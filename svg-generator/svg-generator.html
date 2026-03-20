@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG Generator — Rentried</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <script>
+    (function () {
+      var t = localStorage.getItem('rentried-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <a href="../" class="site-logo">Rentried</a>
+    <span class="nav-sep">·</span>
+    <nav class="site-nav">
+      <a href="../svg-generator/svg-generator.html" class="nav-link active">SVG Generator</a>
+      <span class="nav-sep">·</span>
+      <a href="../gradient-text/gradient-text.html" class="nav-link">Gradient Text</a>
+      <span class="nav-sep">·</span>
+      <a href="../dividers/dividers.html" class="nav-link">Dividers</a>
+    </nav>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">◑</button>
+  </header>
+
+  <div class="page">
+    <div class="mb-3">
+      <p class="page-title">SVG Text Generator</p>
+      <p class="page-desc">Custom styled text for Rentry using SVG.</a></p>
+    </div>
+
+    <div class="tool-layout">
+      <div class="d-flex flex-column gap-2" style="min-width:0">
+
+        <div class="panel" style="grid-column: 1 / -1;">
+          <div class="panel-header">Text</div>
+
+          <div class="mb-3">
+            <div class="toggle-group">
+              <button class="toggle-btn active" data-mode="single" onclick="setTextMode('single')">Single Line</button>
+              <button class="toggle-btn" data-mode="multi" onclick="setTextMode('multi')">Multi Line</button>
+            </div>
+          </div>
+
+          <textarea class="text-input" id="textInput" placeholder="Type your text here...">Hello World</textarea>
+
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <label class="ctrl-label">Size:</label>
+            <input type="number" class="number-input" id="fontSize" value="18" min="8" max="200">
+            <span class="unit">px</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <label class="ctrl-label">Weight:</label>
+            <select class="number-input" id="fontWeight">
+              <option value="100">100 Thin</option>
+              <option value="200">200 Extra Light</option>
+              <option value="300">300 Light</option>
+              <option value="400" selected>400 Normal</option>
+              <option value="500">500 Medium</option>
+              <option value="600">600 Semi Bold</option>
+              <option value="700">700 Bold</option>
+              <option value="800">800 Extra Bold</option>
+              <option value="900">900 Black</option>
+            </select>
+          </div>
+
+          <div class="mb-3 mt-3">
+            <span class="section-label">Alignment</span>
+            <div class="toggle-group">
+              <button class="toggle-btn" data-align="left" onclick="setTextAlign('left')">Left</button>
+              <button class="toggle-btn active" data-align="center" onclick="setTextAlign('center')">Center</button>
+              <button class="toggle-btn" data-align="right" onclick="setTextAlign('right')">Right</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls-grid">
+
+          <div class="panel">
+            <div class="panel-header">Font Family</div>
+            <div class="font-grid" id="fontGrid"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">Color</div>
+
+            <div class="mb-3">
+              <div class="toggle-group">
+                <button class="toggle-btn active" data-color="solid" onclick="setColorMode('solid')">Solid</button>
+                <button class="toggle-btn" data-color="gradient" onclick="setColorMode('gradient')">Gradient</button>
+              </div>
+            </div>
+
+            <div id="solidColorSection">
+              <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2 flex-fill">
+                  <label class="ctrl-label">Color:</label>
+                  <input type="color" class="color-picker" id="solidColor" value="#ffffff">
+                  <input type="text" class="hex-input" id="solidColorHex" value="#ffffff">
+                </div>
+              </div>
+              <div class="mt-2">
+                <div class="slider-label d-flex justify-content-between mb-1">
+                  <span>Opacity</span>
+                  <span id="solidOpacityValue">100%</span>
+                </div>
+                <input type="range" class="slider" id="solidOpacity" min="0" max="1" step="0.05" value="1">
+              </div>
+            </div>
+
+            <div id="gradientColorSection" style="display: none;">
+              <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2 flex-fill">
+                  <label class="ctrl-label">Start:</label>
+                  <input type="color" class="color-picker" id="gradientStart" value="#ff69b4">
+                  <input type="text" class="hex-input" id="gradientStartHex" value="#ff69b4">
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-3 mt-2">
+                <div class="d-flex align-items-center gap-2 flex-fill">
+                  <label class="ctrl-label">End:</label>
+                  <input type="color" class="color-picker" id="gradientEnd" value="#00ffff">
+                  <input type="text" class="hex-input" id="gradientEndHex" value="#00ffff">
+                </div>
+              </div>
+              <div class="mt-2">
+                <div class="slider-label d-flex justify-content-between mb-1">
+                  <span>Opacity</span>
+                  <span id="gradientOpacityValue">100%</span>
+                </div>
+                <input type="range" class="slider" id="gradientOpacity" min="0" max="1" step="0.05" value="1">
+              </div>
+              <span class="section-label mt-2 d-block">Direction</span>
+              <div class="direction-grid">
+                <button class="direction-btn selected" data-dir="right" onclick="setGradientDir('right')">&#8594;</button>
+                <button class="direction-btn" data-dir="left" onclick="setGradientDir('left')">&#8592;</button>
+                <button class="direction-btn" data-dir="down" onclick="setGradientDir('down')">&#8595;</button>
+                <button class="direction-btn" data-dir="up" onclick="setGradientDir('up')">&#8593;</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">Style</div>
+
+            <div class="mb-3">
+              <span class="section-label">Text Style</span>
+              <div class="options-grid cols-2">
+                <div class="option-btn" data-effect="bold" onclick="toggleEffect('bold')">Bold</div>
+                <div class="option-btn" data-effect="italic" onclick="toggleEffect('italic')">Italic</div>
+                <div class="option-btn" data-effect="blur" onclick="toggleEffect('blur')">Blur</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <span class="section-label">Transform</span>
+              <div class="d-flex align-items-center gap-2">
+                <label class="ctrl-label">Rotate:</label>
+                <input type="number" class="number-input" id="textRotate" value="0" min="-180" max="180">
+                <span class="unit">deg</span>
+              </div>
+              <div class="options-grid cols-2 mt-2">
+                <div class="option-btn" data-transform="flipH" onclick="toggleTransform('flipH')">Flip H</div>
+                <div class="option-btn" data-transform="flipV" onclick="toggleTransform('flipV')">Flip V</div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <span class="section-label">Letter Spacing</span>
+              <div class="mt-2">
+                <div class="slider-label d-flex justify-content-between mb-1">
+                  <span>Spacing</span>
+                  <span id="spacingValue">0px</span>
+                </div>
+                <input type="range" class="slider" id="letterSpacing" min="0" max="20" value="0">
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">Decorations</div>
+
+            <div class="mb-3">
+              <div class="d-flex align-items-center gap-2 checkbox-group">
+                <input type="checkbox" id="underlineEnabled" onchange="toggleDecoration('underline')">
+                <label for="underlineEnabled">Underline</label>
+              </div>
+              <div id="underlineSettings" class="collapsible-settings mt-2 pt-2">
+                <div class="options-grid">
+                  <div class="option-btn underline-style selected" data-ulstyle="solid" onclick="setUnderlineStyle('solid')">Solid</div>
+                  <div class="option-btn underline-style" data-ulstyle="wavy" onclick="setUnderlineStyle('wavy')">Wavy</div>
+                  <div class="option-btn underline-style" data-ulstyle="dashed" onclick="setUnderlineStyle('dashed')">Dashed</div>
+                </div>
+                <div class="d-flex align-items-center gap-3 mt-2">
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Color:</label>
+                    <input type="color" class="color-picker" id="underlineColor" value="#ffffff">
+                  </div>
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Width:</label>
+                    <input type="number" class="number-input" id="underlineThickness" value="2" min="1" max="10">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider my-2"></div>
+
+            <div class="mb-3">
+              <div class="d-flex align-items-center gap-2 checkbox-group">
+                <input type="checkbox" id="overlineEnabled" onchange="toggleDecoration('overline')">
+                <label for="overlineEnabled">Overline</label>
+              </div>
+              <div id="overlineSettings" class="collapsible-settings mt-2 pt-2">
+                <div class="options-grid">
+                  <div class="option-btn overline-style selected" data-olstyle="solid" onclick="setOverlineStyle('solid')">Solid</div>
+                  <div class="option-btn overline-style" data-olstyle="wavy" onclick="setOverlineStyle('wavy')">Wavy</div>
+                  <div class="option-btn overline-style" data-olstyle="dashed" onclick="setOverlineStyle('dashed')">Dashed</div>
+                </div>
+                <div class="d-flex align-items-center gap-3 mt-2">
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Color:</label>
+                    <input type="color" class="color-picker" id="overlineColor" value="#ffffff">
+                  </div>
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Width:</label>
+                    <input type="number" class="number-input" id="overlineThickness" value="2" min="1" max="10">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider my-2"></div>
+
+            <div class="mb-3">
+              <div class="d-flex align-items-center gap-2 checkbox-group">
+                <input type="checkbox" id="outlineEnabled" onchange="toggleOutline()">
+                <label for="outlineEnabled">Outline</label>
+              </div>
+              <div id="outlineSettings" class="collapsible-settings mt-2 pt-2">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Color:</label>
+                    <input type="color" class="color-picker" id="outlineColor" value="#ffffff">
+                  </div>
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Width:</label>
+                    <input type="number" class="number-input" id="outlineWidth" value="1" min="0.5" max="5" step="0.5">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">Effects</div>
+
+            <div class="mb-3">
+              <div class="d-flex align-items-center gap-2 checkbox-group">
+                <input type="checkbox" id="glowEnabled" onchange="toggleGlow()">
+                <label for="glowEnabled">Glow</label>
+              </div>
+              <div id="glowSettings" class="collapsible-settings mt-2 pt-2">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Color:</label>
+                    <input type="color" class="color-picker" id="glowColor" value="#ff69b4">
+                  </div>
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Size:</label>
+                    <input type="number" class="number-input" id="glowSize" value="5" min="1" max="20">
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <div class="slider-label d-flex justify-content-between mb-1">
+                    <span>Opacity</span>
+                    <span id="glowOpacityValue">100%</span>
+                  </div>
+                  <input type="range" class="slider" id="glowOpacity" min="0" max="1" step="0.05" value="1">
+                </div>
+              </div>
+            </div>
+
+            <div class="divider my-2"></div>
+
+            <div class="mb-3">
+              <div class="d-flex align-items-center gap-2 checkbox-group">
+                <input type="checkbox" id="shadowEnabled" onchange="toggleShadow()">
+                <label for="shadowEnabled">Shadow</label>
+              </div>
+              <div id="shadowSettings" class="collapsible-settings mt-2 pt-2">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Color:</label>
+                    <input type="color" class="color-picker" id="shadowColor" value="#000000">
+                  </div>
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Blur:</label>
+                    <input type="number" class="number-input" id="shadowBlur" value="3" min="0" max="20">
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <div class="slider-label d-flex justify-content-between mb-1">
+                    <span>Opacity</span>
+                    <span id="shadowOpacityValue">50%</span>
+                  </div>
+                  <input type="range" class="slider" id="shadowOpacity" min="0" max="1" step="0.05" value="0.5">
+                </div>
+                <div class="d-flex align-items-center gap-3 mt-2">
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">X:</label>
+                    <input type="number" class="number-input" id="shadowX" value="2" min="-20" max="20">
+                  </div>
+                  <div class="d-flex align-items-center gap-2 flex-fill">
+                    <label class="ctrl-label">Y:</label>
+                    <input type="number" class="number-input" id="shadowY" value="2" min="-20" max="20">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">Animation</div>
+
+            <div class="mb-3">
+              <div class="options-grid">
+                <div class="option-btn animation-option selected" data-anim="none" onclick="setAnimation('none')">None</div>
+                <div class="option-btn animation-option" data-anim="bounce" onclick="setAnimation('bounce')">Bounce</div>
+                <div class="option-btn animation-option" data-anim="pulse" onclick="setAnimation('pulse')">Pulse</div>
+                <div class="option-btn animation-option" data-anim="glow-pulse" onclick="setAnimation('glow-pulse')">Glow</div>
+                <div class="option-btn animation-option" data-anim="color-shift" onclick="setAnimation('color-shift')">Rainbow</div>
+                <div class="option-btn animation-option" data-anim="float" onclick="setAnimation('float')">Float</div>
+                <div class="option-btn animation-option" data-anim="wiggle" onclick="setAnimation('wiggle')">Wiggle</div>
+                <div class="option-btn animation-option" data-anim="zoom" onclick="setAnimation('zoom')">Zoom</div>
+<div class="option-btn animation-option" data-anim="marquee" onclick="setAnimation('marquee')">Marquee</div>
+              </div>
+            </div>
+
+            <div id="marqueeDirRow" class="mt-2" style="display:none">
+              <div class="section-label">Direction</div>
+              <div class="toggle-group mb-2">
+                <button class="toggle-btn" id="dirLtr" onclick="setMarqueeDir('ltr')">Left → Right</button>
+                <button class="toggle-btn active" id="dirRtl" onclick="setMarqueeDir('rtl')">Right → Left</button>
+              </div>
+              <div class="checkbox-group d-flex align-items-center gap-2">
+                <input type="checkbox" id="marqueeFade" onchange="setMarqueeFade(this)">
+                <label for="marqueeFade">Faded edges</label>
+              </div>
+            </div>
+
+            <div class="mt-2">
+              <div class="slider-label d-flex justify-content-between mb-1">
+                <span>Speed</span>
+                <span id="speedValue">2s</span>
+              </div>
+              <input type="range" class="slider" id="animSpeed" min="0.5" max="10" step="0.1" value="2">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="tool-output">
+        <div class="panel">
+          <div class="panel-header">Preview</div>
+          <div class="preview-area">
+            <div id="previewContent"></div>
+          </div>
+
+          <div class="panel-header">Generated Code</div>
+          <div class="code-output" id="codeOutput"></div>
+
+          <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy Code</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="svg-generator.js"></script>
+  <script>
+    function toggleTheme() {
+      var html = document.documentElement;
+      var t = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', t);
+      localStorage.setItem('rentried-theme', t);
+      document.querySelector('.theme-toggle').textContent = t === 'dark' ? '◑' : '◐';
+    }
+    (function () {
+      var t = localStorage.getItem('rentried-theme') || 'light';
+      var btn = document.querySelector('.theme-toggle');
+      if (btn) btn.textContent = t === 'dark' ? '◑' : '◐';
+    })();
+  </script>
+  <footer class="site-footer">
+    <div class="page">
+      Not affiliated with Rentry.co · Made by <a href="https://github.com/trailblase" target="_blank">trailblase</a> · <a href="https://orion.atabook.org/" target="_blank">Contact / Issues</a>
+    </div>
+  </footer>
+</body>
+</html>
