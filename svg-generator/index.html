@@ -19,8 +19,10 @@
 <body>
   <header class="site-header">
     <a href="../" class="site-logo">Rentried</a>
-    <span class="nav-sep">·</span>
-    <nav class="site-nav">
+
+    <!-- Desktop nav -->
+    <span class="nav-sep d-none d-md-inline">·</span>
+    <nav class="site-nav d-none d-md-flex">
       <a href="../svg-generator/" class="nav-link active">SVG Generator</a>
       <span class="nav-sep">·</span>
       <a href="../gradient-text/gradient-text.html" class="nav-link">Gradient Text</a>
@@ -31,19 +33,32 @@
       <span class="nav-sep">·</span>
       <a href="../circle-widget/" class="nav-link">Circle Widget</a>
     </nav>
+
+    <!-- Mobile dropdown -->
+    <div class="dropdown d-md-none ms-2">
+      <button class="nav-dropdown-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">SVG Generator</button>
+      <ul class="nav-dropdown-menu dropdown-menu">
+        <li><a class="nav-dropdown-item active" href="../svg-generator/">SVG Generator</a></li>
+        <li><a class="nav-dropdown-item" href="../gradient-text/gradient-text.html">Gradient Text</a></li>
+        <li><a class="nav-dropdown-item" href="../dividers/dividers.html">Dividers</a></li>
+        <li><a class="nav-dropdown-item" href="../spotify-widget/">Spotify Widget</a></li>
+        <li><a class="nav-dropdown-item" href="../circle-widget/">Circle Widget</a></li>
+      </ul>
+    </div>
+
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">◑</button>
   </header>
 
   <div class="page">
     <div class="mb-3">
       <p class="page-title">SVG Text Generator</p>
-      <p class="page-desc">Custom styled text for Rentry using SVG.</a></p>
+      <p class="page-desc">Custom styled text for Rentry using SVG.</p>
     </div>
 
     <div class="tool-layout">
       <div class="d-flex flex-column gap-2" style="min-width:0">
 
-        <div class="panel" style="grid-column: 1 / -1;">
+        <div style="grid-column: 1 / -1;">
           <div class="panel-header">Text</div>
 
           <div class="mb-3">
@@ -76,7 +91,7 @@
           </div>
 
           <div class="mb-3 mt-3">
-            <span class="section-label">Alignment</span>
+            <span class="section-label d-block mb-1">Alignment</span>
             <div class="toggle-group">
               <button class="toggle-btn" data-align="left" onclick="setTextAlign('left')">Left</button>
               <button class="toggle-btn active" data-align="center" onclick="setTextAlign('center')">Center</button>
@@ -87,12 +102,12 @@
 
         <div class="controls-grid">
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Font Family</div>
             <div class="font-grid" id="fontGrid"></div>
           </div>
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Color</div>
 
             <div class="mb-3">
@@ -141,7 +156,7 @@
                 </div>
                 <input type="range" class="slider" id="gradientOpacity" min="0" max="1" step="0.05" value="1">
               </div>
-              <span class="section-label mt-2 d-block">Direction</span>
+              <span class="section-label d-block mt-2 mb-1">Direction</span>
               <div class="direction-grid">
                 <button class="direction-btn selected" data-dir="right" onclick="setGradientDir('right')">&#8594;</button>
                 <button class="direction-btn" data-dir="left" onclick="setGradientDir('left')">&#8592;</button>
@@ -151,11 +166,11 @@
             </div>
           </div>
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Style</div>
 
             <div class="mb-3">
-              <span class="section-label">Text Style</span>
+              <span class="section-label d-block mb-1">Text Style</span>
               <div class="options-grid cols-2">
                 <div class="option-btn" data-effect="bold" onclick="toggleEffect('bold')">Bold</div>
                 <div class="option-btn" data-effect="italic" onclick="toggleEffect('italic')">Italic</div>
@@ -164,7 +179,7 @@
             </div>
 
             <div class="mb-3">
-              <span class="section-label">Transform</span>
+              <span class="section-label d-block mb-1">Transform</span>
               <div class="d-flex align-items-center gap-2">
                 <label class="ctrl-label">Rotate:</label>
                 <input type="number" class="number-input" id="textRotate" value="0" min="-180" max="180">
@@ -177,7 +192,7 @@
             </div>
 
             <div class="mb-3">
-              <span class="section-label">Letter Spacing</span>
+              <span class="section-label d-block mb-1">Letter Spacing</span>
               <div class="mt-2">
                 <div class="slider-label d-flex justify-content-between mb-1">
                   <span>Spacing</span>
@@ -188,7 +203,7 @@
             </div>
           </div>
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Decorations</div>
 
             <div class="mb-3">
@@ -263,7 +278,7 @@
             </div>
           </div>
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Effects</div>
 
             <div class="mb-3">
@@ -331,7 +346,7 @@
             </div>
           </div>
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Animation</div>
 
             <div class="mb-3">
@@ -344,12 +359,12 @@
                 <div class="option-btn animation-option" data-anim="float" onclick="setAnimation('float')">Float</div>
                 <div class="option-btn animation-option" data-anim="wiggle" onclick="setAnimation('wiggle')">Wiggle</div>
                 <div class="option-btn animation-option" data-anim="zoom" onclick="setAnimation('zoom')">Zoom</div>
-<div class="option-btn animation-option" data-anim="marquee" onclick="setAnimation('marquee')">Marquee</div>
+                <div class="option-btn animation-option" data-anim="marquee" onclick="setAnimation('marquee')">Marquee</div>
               </div>
             </div>
 
             <div id="marqueeDirRow" class="mt-2" style="display:none">
-              <div class="section-label">Direction</div>
+              <div class="section-label d-block mb-1">Direction</div>
               <div class="toggle-group mb-2">
                 <button class="toggle-btn" id="dirLtr" onclick="setMarqueeDir('ltr')">Left → Right</button>
                 <button class="toggle-btn active" id="dirRtl" onclick="setMarqueeDir('rtl')">Right → Left</button>
@@ -373,7 +388,7 @@
       </div>
 
       <div class="tool-output">
-        <div class="panel">
+        <div>
           <div class="panel-header">Preview</div>
           <div class="preview-area">
             <div id="previewContent"></div>
@@ -388,6 +403,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="svg-generator.js"></script>
   <script>
     function toggleTheme() {

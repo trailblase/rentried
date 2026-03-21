@@ -19,8 +19,10 @@
 <body>
   <header class="site-header">
     <a href="../" class="site-logo">Rentried</a>
-    <span class="nav-sep">·</span>
-    <nav class="site-nav">
+
+    <!-- Desktop nav -->
+    <span class="nav-sep d-none d-md-inline">·</span>
+    <nav class="site-nav d-none d-md-flex">
       <a href="../svg-generator/" class="nav-link">SVG Generator</a>
       <span class="nav-sep">·</span>
       <a href="../gradient-text/gradient-text.html" class="nav-link">Gradient Text</a>
@@ -31,6 +33,19 @@
       <span class="nav-sep">·</span>
       <a href="../circle-widget/" class="nav-link active">Circle Widget</a>
     </nav>
+
+    <!-- Mobile dropdown -->
+    <div class="dropdown d-md-none ms-2">
+      <button class="nav-dropdown-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Circle Widget</button>
+      <ul class="nav-dropdown-menu dropdown-menu">
+        <li><a class="nav-dropdown-item" href="../svg-generator/">SVG Generator</a></li>
+        <li><a class="nav-dropdown-item" href="../gradient-text/gradient-text.html">Gradient Text</a></li>
+        <li><a class="nav-dropdown-item" href="../dividers/dividers.html">Dividers</a></li>
+        <li><a class="nav-dropdown-item" href="../spotify-widget/">Spotify Widget</a></li>
+        <li><a class="nav-dropdown-item active" href="../circle-widget/">Circle Widget</a></li>
+      </ul>
+    </div>
+
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">◑</button>
   </header>
 
@@ -43,7 +58,7 @@
     <div class="tool-layout">
       <div class="d-flex flex-column gap-2" style="min-width:0">
 
-        <div class="panel">
+        <div>
           <div class="panel-header">Spinning Text</div>
           <textarea class="text-input" id="spinText" placeholder="Text that spins around the circle..." style="min-height:60px;resize:vertical">This is a circular circle amazing? Isn't it?</textarea>
           <div class="d-flex align-items-center gap-2 mt-2">
@@ -81,12 +96,12 @@
 
         <div class="controls-grid">
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Font Family</div>
             <div class="font-grid" id="fontGrid"></div>
           </div>
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Text Color</div>
             <div class="mb-3">
               <div class="toggle-group">
@@ -115,7 +130,7 @@
             </div>
           </div>
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Spin</div>
             <div class="d-flex align-items-center gap-2 mb-2">
               <label class="ctrl-label">Speed (s):</label>
@@ -131,7 +146,7 @@
             </div>
           </div>
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Ring</div>
             <div class="d-flex align-items-center gap-2 mb-2">
               <input type="checkbox" id="showRing" checked>
@@ -151,7 +166,7 @@
             </div>
           </div>
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Profile Picture</div>
             <div style="overflow:hidden;width:100%">
               <input type="file" id="pfpUpload" accept="image/*" style="font-size:13px;width:100%;min-width:0">
@@ -159,7 +174,7 @@
             <canvas id="resizeCanvas" width="200" height="200" style="display:none"></canvas>
           </div>
 
-          <div class="panel">
+          <div>
             <div class="panel-header">Background</div>
             <div class="d-flex align-items-center gap-2 mb-2">
               <label class="ctrl-label">Color:</label>
@@ -180,13 +195,13 @@
       </div>
 
       <div class="tool-output">
-        <div class="panel">
+        <div>
           <div class="panel-header">Preview</div>
           <div class="preview-area preview-widget" style="min-height:240px; padding:1rem; display:flex; align-items:center; justify-content:center">
             <div id="previewContent"></div>
           </div>
 
-          <div class="panel-header" style="margin-top:0.625rem">Generated Code</div>
+          <div class="panel-header mt-2">Generated Code</div>
           <div class="code-output" id="codeOutput"></div>
           <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy Code</button>
         </div>
@@ -194,6 +209,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="circle-widget.js"></script>
   <script>
     function toggleTheme() {

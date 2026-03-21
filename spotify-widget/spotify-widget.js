@@ -199,8 +199,8 @@ function update() {
     document.getElementById('showProgress').checked ? 'block' : 'none';
 
   const svg = cardLayout === 'square' ? buildSquareSVG() : buildSVG();
-  const previewW = cardLayout === 'square' ? 220 : 520;
-  document.getElementById('previewContent').innerHTML = `<div style="width:${previewW}px;max-width:100%;overflow:hidden">${svg}</div>`;
+  const previewSvg = svg.replace(/(<svg[^>]*)\swidth="\d+"/, '$1 width="100%"');
+  document.getElementById('previewContent').innerHTML = `<div style="width:100%;overflow:hidden">${previewSvg}</div>`;
 
   const link = document.getElementById('linkUrl').value.trim();
   const b64 = btoa(unescape(encodeURIComponent(svg)));

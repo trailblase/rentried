@@ -19,8 +19,10 @@
 <body>
   <header class="site-header">
     <a href="../" class="site-logo">Rentried</a>
-    <span class="nav-sep">·</span>
-    <nav class="site-nav">
+
+    <!-- Desktop nav -->
+    <span class="nav-sep d-none d-md-inline">·</span>
+    <nav class="site-nav d-none d-md-flex">
       <a href="../svg-generator/" class="nav-link">SVG Generator</a>
       <span class="nav-sep">·</span>
       <a href="../gradient-text/gradient-text.html" class="nav-link">Gradient Text</a>
@@ -31,6 +33,19 @@
       <span class="nav-sep">·</span>
       <a href="../circle-widget/" class="nav-link">Circle Widget</a>
     </nav>
+
+    <!-- Mobile dropdown -->
+    <div class="dropdown d-md-none ms-2">
+      <button class="nav-dropdown-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Dividers</button>
+      <ul class="nav-dropdown-menu dropdown-menu">
+        <li><a class="nav-dropdown-item" href="../svg-generator/">SVG Generator</a></li>
+        <li><a class="nav-dropdown-item" href="../gradient-text/gradient-text.html">Gradient Text</a></li>
+        <li><a class="nav-dropdown-item active" href="../dividers/dividers.html">Dividers</a></li>
+        <li><a class="nav-dropdown-item" href="../spotify-widget/">Spotify Widget</a></li>
+        <li><a class="nav-dropdown-item" href="../circle-widget/">Circle Widget</a></li>
+      </ul>
+    </div>
+
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">◑</button>
   </header>
 
@@ -43,7 +58,7 @@
     <div class="tool-layout">
       <div class="d-flex flex-column gap-3" style="min-width:0">
 
-        <div class="panel">
+        <div>
           <div class="panel-header">Type</div>
           <div class="options-grid cols-2">
             <div class="option-btn selected" data-type="simple" onclick="setType('simple')">Simple Bar</div>
@@ -55,7 +70,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div>
           <div class="panel-header">Color</div>
           <div class="d-flex align-items-center gap-2">
             <input type="color" class="color-picker" id="colorPicker" value="#4099a0" onchange="setColor(this.value)">
@@ -63,7 +78,7 @@
           </div>
         </div>
 
-        <div class="panel" id="thicknessPanel">
+        <div id="thicknessPanel">
           <div class="panel-header">Thickness</div>
           <div class="d-flex align-items-center gap-2">
             <input type="range" class="slider" id="thicknessSlider" min="1" max="20" value="4" oninput="setThickness(this.value)">
@@ -71,7 +86,7 @@
           </div>
         </div>
 
-        <div class="panel" id="widthPanel" style="display:none">
+        <div id="widthPanel" style="display:none">
           <div class="panel-header">Width</div>
           <div class="d-flex align-items-center gap-2">
             <input type="range" class="slider" id="widthSlider" min="10" max="100" step="5" value="100" oninput="setWidth(this.value)">
@@ -79,14 +94,14 @@
           </div>
         </div>
 
-        <div class="panel" id="fadedPanel" style="display:none">
+        <div id="fadedPanel" style="display:none">
           <div class="checkbox-group d-flex align-items-center gap-2">
             <input type="checkbox" id="fadedCheck" onchange="setFaded(this.checked)">
             <label for="fadedCheck">Faded ends</label>
           </div>
         </div>
 
-        <div class="panel" id="glowPanel" style="display:none">
+        <div id="glowPanel" style="display:none">
           <div class="panel-header">Glow Color</div>
           <div class="d-flex align-items-center gap-2">
             <input type="color" class="color-picker" id="glowPicker" value="#9ecfd2" onchange="setGlowColor(this.value)">
@@ -94,7 +109,7 @@
           </div>
         </div>
 
-        <div class="panel" id="musicStylePanel" style="display:none">
+        <div id="musicStylePanel" style="display:none">
           <div class="panel-header">Style</div>
           <div class="toggle-group">
             <button class="toggle-btn active" id="styleBottom" onclick="setMusicStyle('bottom')">Bottom</button>
@@ -105,12 +120,12 @@
       </div>
 
       <div class="tool-output">
-        <div class="panel">
+        <div>
           <div class="panel-header">Preview</div>
           <div class="preview-area" id="preview" style="min-height:80px; padding:1.5rem 1.25rem;"></div>
         </div>
 
-        <div class="panel">
+        <div>
           <div class="panel-header">Rentry Code</div>
           <div class="code-output" id="output"></div>
           <button class="copy-btn" id="copyBtn" onclick="copyOutput()">Copy Code</button>
@@ -119,6 +134,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="dividers.js"></script>
   <script>
     function toggleTheme() {
