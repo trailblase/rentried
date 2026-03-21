@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="../styles.css">
   <script>
     (function () {
-      var t = localStorage.getItem('rentried-theme') || 'light';
+      var t = localStorage.getItem('rentried-theme') || 'dark';
       document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
@@ -26,6 +26,10 @@
       <a href="../gradient-text/gradient-text.html" class="nav-link active">Gradient Text</a>
       <span class="nav-sep">·</span>
       <a href="../dividers/dividers.html" class="nav-link">Dividers</a>
+      <span class="nav-sep">·</span>
+      <a href="../spotify-widget/" class="nav-link">Spotify Widget</a>
+      <span class="nav-sep">·</span>
+      <a href="../circle-widget/" class="nav-link">Circle Widget</a>
     </nav>
     <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">◑</button>
   </header>
@@ -125,7 +129,7 @@
       document.querySelector('.theme-toggle').textContent = t === 'dark' ? '◑' : '◐';
     }
     (function () {
-      var t = localStorage.getItem('rentried-theme') || 'light';
+      var t = localStorage.getItem('rentried-theme') || 'dark';
       var btn = document.querySelector('.theme-toggle');
       if (btn) btn.textContent = t === 'dark' ? '◑' : '◐';
     })();

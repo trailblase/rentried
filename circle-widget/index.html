@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circle Widget — Rentried</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../styles.css">
+  <script>
+    (function () {
+      var t = localStorage.getItem('rentried-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <a href="../" class="site-logo">Rentried</a>
+    <span class="nav-sep">·</span>
+    <nav class="site-nav">
+      <a href="../svg-generator/" class="nav-link">SVG Generator</a>
+      <span class="nav-sep">·</span>
+      <a href="../gradient-text/gradient-text.html" class="nav-link">Gradient Text</a>
+      <span class="nav-sep">·</span>
+      <a href="../dividers/dividers.html" class="nav-link">Dividers</a>
+      <span class="nav-sep">·</span>
+      <a href="../spotify-widget/" class="nav-link">Spotify Widget</a>
+      <span class="nav-sep">·</span>
+      <a href="../circle-widget/" class="nav-link active">Circle Widget</a>
+    </nav>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">◑</button>
+  </header>
+
+  <div class="page">
+    <div class="mb-3">
+      <p class="page-title">Circle Widget Generator</p>
+      <p class="page-desc">Circular profile picture with spinning text for Rentry pages.</p>
+    </div>
+
+    <div class="tool-layout">
+      <div class="d-flex flex-column gap-2" style="min-width:0">
+
+        <div class="panel">
+          <div class="panel-header">Spinning Text</div>
+          <textarea class="text-input" id="spinText" placeholder="Text that spins around the circle..." style="min-height:60px;resize:vertical">This is a circular circle amazing? Isn't it?</textarea>
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <label class="ctrl-label">Size:</label>
+            <input type="number" class="number-input" id="fontSize" value="13" min="8" max="26">
+            <span class="unit">px</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <label class="ctrl-label">Weight:</label>
+            <select class="number-input" id="fontWeight">
+              <option value="100">100 Thin</option>
+              <option value="200">200 Extra Light</option>
+              <option value="300">300 Light</option>
+              <option value="400" selected>400 Normal</option>
+              <option value="500">500 Medium</option>
+              <option value="600">600 Semi Bold</option>
+              <option value="700">700 Bold</option>
+              <option value="800">800 Extra Bold</option>
+              <option value="900">900 Black</option>
+            </select>
+          </div>
+          <div class="d-flex align-items-center gap-2 mt-2">
+            <div class="option-btn" id="btnBold" onclick="toggleStyle('bold')">Bold</div>
+            <div class="option-btn" id="btnItalic" onclick="toggleStyle('italic')">Italic</div>
+          </div>
+          <div class="mt-2">
+            <div class="slider-label d-flex justify-content-between mb-1">
+              <span>Letter Spacing</span>
+              <span id="spacingValue">0px</span>
+            </div>
+            <input type="range" class="slider" id="letterSpacing" min="0" max="20" value="0"
+              oninput="document.getElementById('spacingValue').textContent=this.value+'px';build()">
+          </div>
+        </div>
+
+        <div class="controls-grid">
+
+          <div class="panel">
+            <div class="panel-header">Font Family</div>
+            <div class="font-grid" id="fontGrid"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">Text Color</div>
+            <div class="mb-3">
+              <div class="toggle-group">
+                <button class="toggle-btn active" data-color="solid" onclick="setColorMode('solid')">Solid</button>
+                <button class="toggle-btn" data-color="gradient" onclick="setColorMode('gradient')">Gradient</button>
+              </div>
+            </div>
+            <div id="solidColorSection">
+              <div class="d-flex align-items-center gap-2">
+                <label class="ctrl-label">Color:</label>
+                <input type="color" class="color-picker" id="solidColor" value="#ffffff">
+                <input type="text" class="hex-input" id="solidColorHex" value="#ffffff">
+              </div>
+            </div>
+            <div id="gradientColorSection" style="display:none">
+              <div class="d-flex align-items-center gap-2">
+                <label class="ctrl-label">Start:</label>
+                <input type="color" class="color-picker" id="gradStart" value="#ff69b4">
+                <input type="text" class="hex-input" id="gradStartHex" value="#ff69b4">
+              </div>
+              <div class="d-flex align-items-center gap-2 mt-2">
+                <label class="ctrl-label">End:</label>
+                <input type="color" class="color-picker" id="gradEnd" value="#00ffff">
+                <input type="text" class="hex-input" id="gradEndHex" value="#00ffff">
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">Spin</div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <label class="ctrl-label">Speed (s):</label>
+              <input type="number" class="number-input" id="spinSpeed" value="8" min="1" max="60">
+              <span class="unit" style="color:var(--text-muted);font-size:11px">lower = faster</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <label class="ctrl-label">Direction:</label>
+              <select class="number-input" id="spinDir">
+                <option value="1">Clockwise</option>
+                <option value="-1">Counter-clockwise</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">Ring</div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <input type="checkbox" id="showRing" checked>
+              <label for="showRing" style="margin:0;cursor:pointer">Show ring</label>
+            </div>
+            <div id="ringOptions">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <label class="ctrl-label">Color:</label>
+                <input type="color" class="color-picker" id="ringColor" value="#1ed760">
+                <input type="text" class="hex-input" id="ringColorHex" value="#1ed760">
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <label class="ctrl-label">Width:</label>
+                <input type="number" class="number-input" id="ringWidth" value="3" min="1" max="12">
+                <span class="unit">px</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">Profile Picture</div>
+            <div style="overflow:hidden;width:100%">
+              <input type="file" id="pfpUpload" accept="image/*" style="font-size:13px;width:100%;min-width:0">
+            </div>
+            <canvas id="resizeCanvas" width="200" height="200" style="display:none"></canvas>
+          </div>
+
+          <!-- Background -->
+          <div class="panel">
+            <div class="panel-header">Background</div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <label class="ctrl-label">Color:</label>
+              <input type="color" class="color-picker" id="bgColor" value="#12122a">
+              <input type="text" class="hex-input" id="bgColorHex" value="#12122a">
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <label class="ctrl-label">Shape:</label>
+              <select class="number-input" id="cardShape">
+                <option value="circle">Circle</option>
+                <option value="square">Square</option>
+                <option value="none">None (transparent)</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div class="tool-output">
+        <div class="panel">
+          <div class="panel-header">Preview</div>
+          <div class="preview-area" style="background:#1a1a2e; min-height:240px; padding:1rem; display:flex; align-items:center; justify-content:center">
+            <div id="previewContent"></div>
+          </div>
+
+          <div class="panel-header" style="margin-top:0.625rem">Generated Code</div>
+          <div class="code-output" id="codeOutput"></div>
+          <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy Code</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="circle-widget.js"></script>
+  <script>
+    function toggleTheme() {
+      var html = document.documentElement;
+      var t = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', t);
+      localStorage.setItem('rentried-theme', t);
+      document.querySelector('.theme-toggle').textContent = t === 'dark' ? '◑' : '◐';
+    }
+    (function () {
+      var t = localStorage.getItem('rentried-theme') || 'dark';
+      var btn = document.querySelector('.theme-toggle');
+      if (btn) btn.textContent = t === 'dark' ? '◑' : '◐';
+    })();
+  </script>
+  <footer class="site-footer">
+    <div class="page">
+      Not affiliated with Rentry.co · Made by <a href="https://github.com/trailblase" target="_blank">trailblase</a> · <a href="https://orion.atabook.org/" target="_blank">Contact / Issues</a>
+    </div>
+  </footer>
+</body>
+</html>
