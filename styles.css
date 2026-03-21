@@ -626,6 +626,13 @@ select.number-input option {
   color: var(--text-muted);
 }
 
+.preview-area.preview-widget {
+  background: #ffffff;
+}
+[data-theme="dark"] .preview-area.preview-widget {
+  background: var(--surface);
+}
+
 .gradient-bar {
   height: 4px;
   border-radius: 2px;
