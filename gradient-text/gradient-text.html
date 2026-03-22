@@ -60,7 +60,8 @@
           </div>
 
           <div class="mb-3">
-            <span class="section-label d-block mb-1">Import — paste a Coolors URL or hex codes</span>
+            <span class="section-label d-block mb-1">Import to paste a Coolors URL or hex codes (can separate by comma)</span>
+            <span class="section-label d-block mb-1">Example: https://coolors.co/ff0000-00ff00 or #ff0000, #00ff00</span>
             <div class="d-flex gap-2">
               <input type="text" class="text-input" id="importInput" placeholder="https://coolors.co/ff0000-00ff00 or #ff0000, #00ff00" style="min-height:unset; padding: 0.375rem 0.625rem; font-size: 0.8rem;" onkeydown="if(event.key==='Enter')importColors(this.value)">
               <button class="copy-btn" id="importBtn" style="width:auto; margin-top:0; padding: 0.375rem 0.875rem; font-size:0.8rem; white-space:nowrap" onclick="importColors(document.getElementById('importInput').value)">Import</button>

@@ -36,8 +36,6 @@ function buildSVG() {
   const progressColor = document.getElementById('progressColor').value;
 
   const W = 520, H = 120;
-
-  // Spotify logo: 88x88, vertically centered
   const logoSize = 88;
   const logoX = 14;
   const logoY = (H - logoSize) / 2;

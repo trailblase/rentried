@@ -33,8 +33,6 @@ var state = {
   animSpeed: 8
 };
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 function el(id)  { return document.getElementById(id); }
 function on(id, ev, fn) { el(id).addEventListener(ev, fn); }
 
@@ -51,8 +49,6 @@ function escXML(s) {
 function hexToRgba(hex, opacity) {
   return 'rgba(' + parseInt(hex.slice(1,3),16) + ',' + parseInt(hex.slice(3,5),16) + ',' + parseInt(hex.slice(5,7),16) + ',' + opacity + ')';
 }
-
-// ── Control handlers ──────────────────────────────────────────────────────────
 
 function setColorMode(mode) {
   state.colorMode = mode;
@@ -121,8 +117,6 @@ function setMarqueeFade(checkbox) {
   updateLivePreview();
 }
 
-// ── Live preview ──────────────────────────────────────────────────────────────
-
 function updateLivePreview() {
   var span  = el('marqSpan');
   var track = el('marqTrack');
@@ -172,8 +166,6 @@ function updateLivePreview() {
   track.style.animation = (state.marqueeType === 'ltr' ? 'scroll-ltr' : 'scroll-rtl') + ' ' + state.animSpeed + 's linear infinite';
 }
 
-// ── Font loading from URL ─────────────────────────────────────────────────────
-
 function loadFontFromUrl() {
   var raw = el('fontUrlInput').value.trim();
   if (!raw) return;
@@ -192,9 +184,14 @@ function loadFontFromUrl() {
   updateLivePreview();
 }
 
-// ── Font fetching / base64 ────────────────────────────────────────────────────
-
-var SUBSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 .,!?-\'":;()/\u2726\u00B7\u2014~*';
+function buildSubset(text) {
+  var seen = {}, chars = '';
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i];
+    if (!seen[c]) { seen[c] = true; chars += c; }
+  }
+  return chars || ' ';
+}
 
 function bufToB64(buf) {
   var bytes = new Uint8Array(buf), out = '', C = 8192;
@@ -231,9 +228,11 @@ function embedFont() {
   var fam      = activeFamily();
   var fallback = _customFont ? null : el('fontPicker').selectedOptions[0].dataset.url;
   var btn      = el('embedBtn');
+  var subset   = buildSubset(el('textInput').value || 'Hello World');
+  var cacheKey = fam + '\x00' + subset;
 
-  if (_fontCache[fam]) {
-    buildSVG(fam, _fontCache[fam]);
+  if (_fontCache[cacheKey]) {
+    buildSVG(fam, _fontCache[cacheKey]);
     el('copyBtn').disabled = false;
     return;
   }
@@ -242,7 +241,7 @@ function embedFont() {
   setStatus('Fetching "' + fam + '" from Google Fonts\u2026');
 
   var famSlug = fam.replace(/ /g, '+');
-  fetch('https://fonts.googleapis.com/css2?family=' + famSlug + '&text=' + encodeURIComponent(SUBSET) + '&display=swap')
+  fetch('https://fonts.googleapis.com/css2?family=' + famSlug + '&text=' + encodeURIComponent(subset) + '&display=swap')
     .then(function(r) { return r.text(); })
     .then(function(css) {
       var urls = extractUrls(css);
@@ -256,7 +255,7 @@ function embedFont() {
         : fetchLatinFromCss(famSlug);
     })
     .then(function(b64arr) {
-      _fontCache[fam] = b64arr;
+      _fontCache[cacheKey] = b64arr;
       buildSVG(fam, b64arr);
       btn.disabled = false;
       el('copyBtn').disabled = false;
@@ -268,8 +267,6 @@ function embedFont() {
       setStatus('Error: ' + (err && err.message ? err.message : String(err)));
     });
 }
-
-// ── SVG builder ───────────────────────────────────────────────────────────────
 
 function buildSVG(fontFamily, b64arr) {
   var text = (el('textInput').value || 'Hello World').replace(/\n/g, ' ');
@@ -372,8 +369,6 @@ function buildWavyPath(width, y, amp, wl) {
   return path;
 }
 
-// ── Event listeners ───────────────────────────────────────────────────────────
-
 on('fontUrlInput', 'paste',   function() { setTimeout(loadFontFromUrl, 30); });
 on('fontUrlInput', 'keydown', function(e) { if (e.key === 'Enter') loadFontFromUrl(); });
 
@@ -388,7 +383,6 @@ on('textInput', 'input', updateLivePreview);
 on('fontSize', 'input', function(e) { state.fontSize = parseInt(e.target.value) || 42; updateLivePreview(); });
 on('fontWeight', 'change', function(e) { state.fontWeight = parseInt(e.target.value); updateLivePreview(); });
 
-// Color + hex pairs
 function bindColorPair(colorId, hexId, stateKey) {
   on(colorId, 'input', function(e) {
     state[stateKey] = e.target.value;
@@ -407,7 +401,6 @@ bindColorPair('solidColor',    'solidColorHex',    'solidColor');
 bindColorPair('gradientStart', 'gradientStartHex', 'gradientStart');
 bindColorPair('gradientEnd',   'gradientEndHex',   'gradientEnd');
 
-// Opacity sliders
 function bindOpacity(sliderId, labelId, stateKey) {
   on(sliderId, 'input', function(e) {
     state[stateKey] = parseFloat(e.target.value);
@@ -447,7 +440,5 @@ on('animSpeed', 'input', function(e) {
   el('speedLabel').textContent = state.animSpeed + 's';
   updateLivePreview();
 });
-
-// ── Init ──────────────────────────────────────────────────────────────────────
 
 updateLivePreview();
