@@ -234,16 +234,6 @@ function setPlayerState(state) {
   update();
 }
 
-function copyCode() {
-  const code = document.getElementById('codeOutput').textContent;
-  navigator.clipboard.writeText(code).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy Code'; btn.classList.remove('copied'); }, 1500);
-  });
-}
-
 function bindColorHex(pickerId, hexId) {
   const picker = document.getElementById(pickerId);
   const hex = document.getElementById(hexId);

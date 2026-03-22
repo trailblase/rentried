@@ -88,22 +88,18 @@ function build() {
   const fontStyle  = isItalic ? 'italic' : 'normal';
   const weight     = isBold ? 700 : parseInt(fontWeight);
 
-  // Full circle path for spinning text
   const r = textR;
   const circlePath = `M ${cx},${cy - r} A ${r},${r} 0 1 1 ${cx - 0.01},${cy - r}`;
 
-  // Background
   const bgEl = cardShape === 'none' ? '' :
     cardShape === 'circle'
       ? `<circle cx="${cx}" cy="${cy}" r="${S/2 - 1}" fill="${bgColor}"/>`
       : `<rect width="${S}" height="${S}" rx="12" fill="${bgColor}"/>`;
 
-  // Ring
   const ringEl = ringW > 0
     ? `<circle cx="${cx}" cy="${cy}" r="${pfpR}" fill="none" stroke="${ringColor}" stroke-width="${ringW}"/>`
     : '';
 
-  // PFP
   const clipR = pfpR - ringW / 2;
   const pfpEl = pfpDataUrl
     ? `<clipPath id="pfpClip"><circle cx="${cx}" cy="${cy}" r="${clipR}"/></clipPath>
@@ -111,7 +107,6 @@ function build() {
     : `<circle cx="${cx}" cy="${cy}" r="${clipR}" fill="#333"/>
        <text x="${cx}" y="${cy + 5}" text-anchor="middle" fill="#666" font-size="13" font-family="system-ui">no image</text>`;
 
-  // Text color / gradient
   let textFill, gradDef = '';
   if (colorMode === 'gradient') {
     const gs = document.getElementById('gradStart').value;
@@ -157,15 +152,6 @@ function build() {
   document.getElementById('codeOutput').textContent = code;
 }
 
-function copyCode() {
-  const code = document.getElementById('codeOutput').textContent;
-  navigator.clipboard.writeText(code);
-  const btn = document.getElementById('copyBtn');
-  btn.textContent = 'Copied!';
-  setTimeout(() => btn.textContent = 'Copy Code', 1500);
-}
-
-// Event wiring
 document.getElementById('pfpUpload').addEventListener('change', function () {
   const file = this.files[0];
   if (!file) return;
@@ -194,7 +180,6 @@ document.getElementById('showRing').addEventListener('change', function () {
 ['fontSize','fontWeight','spinSpeed','spinDir','ringWidth','cardShape'].forEach(id =>
   document.getElementById(id).addEventListener('change', build));
 
-// Color picker ↔ hex sync
 [
   ['solidColor','solidColorHex'],
   ['gradStart','gradStartHex'],

@@ -1,43 +1,89 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SVG Generator — Rentried</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Experimental — Rentried</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Castoro+Titling&family=Cinzel&family=Cormorant+Garamond&family=Cossette+Titre&family=DotGothic16&family=Josefin+Slab&family=Libre+Baskerville&family=Sour+Gummy&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="../styles.css">
   <script src="../common.js"></script>
-</head>
-<body data-page="svg-generator">
-  <script>_renderHeader('svg-generator');</script>
+  <style>
+    @keyframes scroll-rtl { from { transform: translateX(100vw);  } to { transform: translateX(-100%); } }
+    @keyframes scroll-ltr { from { transform: translateX(-100%);  } to { transform: translateX(100vw); } }
 
+    .marquee-preview { min-height: 64px; }
+    .marquee-text    { color: var(--text); }
+
+    .embed-status { font-size: 0.75rem; color: var(--text-muted); margin: 0.4rem 0 0.75rem; min-height: 1.1em; }
+    .secondary-btn {
+      padding: 0.5rem 1rem; background: var(--btn-bg); border: none;
+      border-radius: var(--radius); color: var(--text-muted); font-family: inherit;
+      font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: opacity 0.1s;
+    }
+    .secondary-btn:hover { color: var(--text); }
+    .secondary-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .font-input-row input[type=text] {
+      flex: 1; min-width: 0; padding: 0.375rem 0.5rem;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text); font-family: inherit; font-size: 0.8rem;
+    }
+    .font-input-row input[type=text]:focus { outline: none; border-color: var(--border-strong); }
+    .font-input-row select {
+      padding: 0.375rem 0.5rem; background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text); font-family: inherit; font-size: 0.8rem; width: 100%;
+    }
+    .font-input-row select:focus { outline: none; border-color: var(--border-strong); }
+
+    .warning-banner {
+      background: color-mix(in srgb, #c47e00 10%, var(--bg));
+      border: 1px solid color-mix(in srgb, #c47e00 35%, var(--bg));
+      border-radius: var(--radius); padding: 0.65rem 0.875rem; margin-bottom: 1.5rem;
+      color: color-mix(in srgb, #c47e00 75%, var(--text)); font-size: 0.8rem; line-height: 1.5;
+    }
+  </style>
+</head>
+<body data-page="experimental">
+  <script>_renderHeader('experimental');</script>
   <div class="page">
     <div class="mb-3">
-      <p class="page-title">SVG Text Generator</p>
-      <p class="page-desc">Custom styled text for Rentry using SVG.</p>
+      <p class="page-title">Experimental marquee with custom fonts</p>
+    </div>
+
+    <div class="warning-banner">
+      <strong>Font embedding is heavy.</strong> Fetches and base64-encodes WOFF2 font files from Google Fonts. The resulting SVG can be several hundred KB and may be slow on poor connections.
     </div>
 
     <div class="tool-layout">
       <div class="d-flex flex-column gap-2" style="min-width:0">
-
-        <div style="grid-column: 1 / -1;">
-          <div class="panel-header">Text</div>
-
-          <div class="mb-3">
-            <div class="toggle-group">
-              <button class="toggle-btn active" data-mode="single" onclick="setTextMode('single')">Single Line</button>
-              <button class="toggle-btn" data-mode="multi" onclick="setTextMode('multi')">Multi Line</button>
-            </div>
+        <div>
+          <div class="panel-header">Font</div>
+          <div class="font-input-row d-flex gap-2 flex-wrap align-items-center mb-2">
+            <input type="text" id="fontUrlInput" placeholder="Paste a Google Fonts URL and press Enter&hellip;">
           </div>
-
-          <textarea class="text-input" id="textInput" placeholder="Type your text here...">Hello World</textarea>
-
+          <div class="font-input-row d-flex gap-2 flex-wrap align-items-center mb-2">
+            <select id="fontPicker">
+              <option value="Cossette Titre"     data-url="https://fonts.gstatic.com/s/cossettetitre/v3/11hYGpvKz1nGbxMXUWz9OdPzuhEepvY.woff2">Cossette Titre</option>
+              <option value="Castoro Titling"    data-url="https://fonts.gstatic.com/s/castorotitling/v10/buEupouwccj03leTfjUAhEZWlrNaZQ0l.woff2">Castoro Titling</option>
+              <option value="Cinzel"             data-url="https://fonts.gstatic.com/s/cinzel/v26/8vIU7ww63mVu7gtR-kwKxNvkNOjw-tbnfY3lDQ.woff2">Cinzel</option>
+              <option value="Cormorant Garamond" data-url="https://fonts.gstatic.com/s/cormorantgaramond/v21/co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_v86KnTOig.woff2">Cormorant Garamond</option>
+              <option value="DotGothic16"        data-url="https://fonts.gstatic.com/s/dotgothic16/v21/v6-QGYjBJFKgyw5nSoDAGH7M6X8.woff2">DotGothic16</option>
+              <option value="Josefin Slab"       data-url="https://fonts.gstatic.com/s/josefinslab/v29/lW-swjwOK3Ps5GSJlNNkMalNpiZe_ldbOR4W71msR349Kg.woff2">Josefin Slab</option>
+              <option value="Libre Baskerville"  data-url="https://fonts.gstatic.com/s/librebaskerville/v24/kmKUZrc3Hgbbcjq75U4uslyuy4kn0olVQ-LglH6T17uj8Q4iDgNP.woff2">Libre Baskerville</option>
+              <option value="Sour Gummy"         data-url="https://fonts.gstatic.com/s/sourgummy/v3/8AtGGs2gPYuNDii97MjjBrLbYfdJvDU5AZfP5opPVCC4oC5ANR1N88Nk8FqN.woff2">Sour Gummy</option>
+              <option value="UnifrakturMaguntia" data-url="https://fonts.gstatic.com/s/unifrakturmaguntia/v22/WWXPlieVYwiGNomYU-ciRLRvEmK7oaVemGZM.woff2">UnifrakturMaguntia</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <div class="panel-header">Text</div>
+          <textarea class="text-input" id="textInput" placeholder="Type your text here..." rows="2">Hello World</textarea>
           <div class="d-flex align-items-center gap-2 mt-2">
             <label class="ctrl-label">Size:</label>
-            <input type="number" class="number-input" id="fontSize" value="18" min="8" max="200">
+            <input type="number" class="number-input" id="fontSize" value="42" min="8" max="200">
             <span class="unit">px</span>
           </div>
           <div class="d-flex align-items-center gap-2 mt-2">
@@ -54,41 +100,21 @@
               <option value="900">900 Black</option>
             </select>
           </div>
-
-          <div class="mb-3 mt-3">
-            <span class="section-label d-block mb-1">Alignment</span>
-            <div class="toggle-group">
-              <button class="toggle-btn" data-align="left" onclick="setTextAlign('left')">Left</button>
-              <button class="toggle-btn active" data-align="center" onclick="setTextAlign('center')">Center</button>
-              <button class="toggle-btn" data-align="right" onclick="setTextAlign('right')">Right</button>
-            </div>
-          </div>
         </div>
-
         <div class="controls-grid">
-
-          <div>
-            <div class="panel-header">Font Family</div>
-            <div class="font-grid" id="fontGrid"></div>
-          </div>
-
           <div>
             <div class="panel-header">Color</div>
-
             <div class="mb-3">
               <div class="toggle-group">
                 <button class="toggle-btn active" data-color="solid" onclick="setColorMode('solid')">Solid</button>
                 <button class="toggle-btn" data-color="gradient" onclick="setColorMode('gradient')">Gradient</button>
               </div>
             </div>
-
             <div id="solidColorSection">
-              <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center gap-2 flex-fill">
-                  <label class="ctrl-label">Color:</label>
-                  <input type="color" class="color-picker" id="solidColor" value="#ffffff">
-                  <input type="text" class="hex-input" id="solidColorHex" value="#ffffff">
-                </div>
+              <div class="d-flex align-items-center gap-2 flex-fill">
+                <label class="ctrl-label">Color:</label>
+                <input type="color" class="color-picker" id="solidColor" value="#ffffff">
+                <input type="text" class="hex-input" id="solidColorHex" value="#ffffff">
               </div>
               <div class="mt-2">
                 <div class="slider-label d-flex justify-content-between mb-1">
@@ -98,21 +124,16 @@
                 <input type="range" class="slider" id="solidOpacity" min="0" max="1" step="0.05" value="1">
               </div>
             </div>
-
-            <div id="gradientColorSection" style="display: none;">
-              <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center gap-2 flex-fill">
-                  <label class="ctrl-label">Start:</label>
-                  <input type="color" class="color-picker" id="gradientStart" value="#ff69b4">
-                  <input type="text" class="hex-input" id="gradientStartHex" value="#ff69b4">
-                </div>
+            <div id="gradientColorSection" style="display:none">
+              <div class="d-flex align-items-center gap-2 flex-fill">
+                <label class="ctrl-label">Start:</label>
+                <input type="color" class="color-picker" id="gradientStart" value="#ff69b4">
+                <input type="text" class="hex-input" id="gradientStartHex" value="#ff69b4">
               </div>
-              <div class="d-flex align-items-center gap-3 mt-2">
-                <div class="d-flex align-items-center gap-2 flex-fill">
-                  <label class="ctrl-label">End:</label>
-                  <input type="color" class="color-picker" id="gradientEnd" value="#00ffff">
-                  <input type="text" class="hex-input" id="gradientEndHex" value="#00ffff">
-                </div>
+              <div class="d-flex align-items-center gap-2 flex-fill mt-2">
+                <label class="ctrl-label">End:</label>
+                <input type="color" class="color-picker" id="gradientEnd" value="#00ffff">
+                <input type="text" class="hex-input" id="gradientEndHex" value="#00ffff">
               </div>
               <div class="mt-2">
                 <div class="slider-label d-flex justify-content-between mb-1">
@@ -130,10 +151,8 @@
               </div>
             </div>
           </div>
-
           <div>
             <div class="panel-header">Style</div>
-
             <div class="mb-3">
               <span class="section-label d-block mb-1">Text Style</span>
               <div class="options-grid cols-2">
@@ -142,35 +161,17 @@
                 <div class="option-btn" data-effect="blur" onclick="toggleEffect('blur')">Blur</div>
               </div>
             </div>
-
-            <div class="mb-3">
-              <span class="section-label d-block mb-1">Transform</span>
-              <div class="d-flex align-items-center gap-2">
-                <label class="ctrl-label">Rotate:</label>
-                <input type="number" class="number-input" id="textRotate" value="0" min="-180" max="180">
-                <span class="unit">deg</span>
-              </div>
-              <div class="options-grid cols-2 mt-2">
-                <div class="option-btn" data-transform="flipH" onclick="toggleTransform('flipH')">Flip H</div>
-                <div class="option-btn" data-transform="flipV" onclick="toggleTransform('flipV')">Flip V</div>
-              </div>
-            </div>
-
             <div class="mb-3">
               <span class="section-label d-block mb-1">Letter Spacing</span>
-              <div class="mt-2">
-                <div class="slider-label d-flex justify-content-between mb-1">
-                  <span>Spacing</span>
-                  <span id="spacingValue">0px</span>
-                </div>
-                <input type="range" class="slider" id="letterSpacing" min="0" max="20" value="0">
+              <div class="slider-label d-flex justify-content-between mb-1">
+                <span>Spacing</span>
+                <span id="spacingValue">0px</span>
               </div>
+              <input type="range" class="slider" id="letterSpacing" min="0" max="20" value="0">
             </div>
           </div>
-
           <div>
             <div class="panel-header">Decorations</div>
-
             <div class="mb-3">
               <div class="d-flex align-items-center gap-2 checkbox-group">
                 <input type="checkbox" id="underlineEnabled" onchange="toggleDecoration('underline')">
@@ -194,9 +195,7 @@
                 </div>
               </div>
             </div>
-
             <div class="divider my-2"></div>
-
             <div class="mb-3">
               <div class="d-flex align-items-center gap-2 checkbox-group">
                 <input type="checkbox" id="overlineEnabled" onchange="toggleDecoration('overline')">
@@ -245,7 +244,6 @@
 
           <div>
             <div class="panel-header">Effects</div>
-
             <div class="mb-3">
               <div class="d-flex align-items-center gap-2 checkbox-group">
                 <input type="checkbox" id="glowEnabled" onchange="toggleGlow()">
@@ -312,43 +310,23 @@
           </div>
 
           <div>
-            <div class="panel-header">Animation</div>
-
+            <div class="panel-header">Marquee</div>
             <div class="mb-3">
-              <div class="options-grid">
-                <div class="option-btn animation-option selected" data-anim="none" onclick="setAnimation('none')">None</div>
-                <div class="option-btn animation-option" data-anim="bounce" onclick="setAnimation('bounce')">Bounce</div>
-                <div class="option-btn animation-option" data-anim="pulse" onclick="setAnimation('pulse')">Pulse</div>
-                <div class="option-btn animation-option" data-anim="glow-pulse" onclick="setAnimation('glow-pulse')">Glow</div>
-                <div class="option-btn animation-option" data-anim="color-shift" onclick="setAnimation('color-shift')">Rainbow</div>
-                <div class="option-btn animation-option" data-anim="float" onclick="setAnimation('float')">Float</div>
-                <div class="option-btn animation-option" data-anim="wiggle" onclick="setAnimation('wiggle')">Wiggle</div>
-                <div class="option-btn animation-option" data-anim="zoom" onclick="setAnimation('zoom')">Zoom</div>
-                <div class="option-btn animation-option" data-anim="marquee" onclick="setAnimation('marquee')">Marquee</div>
-                <div class="option-btn animation-option" data-anim="scroll-up" onclick="setAnimation('scroll-up')">Scroll Up</div>
-                <div class="option-btn animation-option" data-anim="scroll-down" onclick="setAnimation('scroll-down')">Scroll Down</div>
+              <div class="options-grid" style="grid-template-columns: repeat(2, 1fr)">
+                <div class="option-btn selected" data-mtype="rtl" onclick="setMarqueeType('rtl')">&#8592; Left</div>
+                <div class="option-btn"          data-mtype="ltr" onclick="setMarqueeType('ltr')">Right &#8594;</div>
               </div>
-            </div>
-
-            <div id="marqueeDirRow" class="mt-2" style="display:none">
-              <div class="section-label d-block mb-1">Direction</div>
-              <div class="toggle-group mb-2">
-                <button class="toggle-btn" id="dirLtr" onclick="setMarqueeDir('ltr')">Left → Right</button>
-                <button class="toggle-btn active" id="dirRtl" onclick="setMarqueeDir('rtl')">Right → Left</button>
-                <button class="toggle-btn" id="dirBounce" onclick="setMarqueeDir('bounce')">↔ Bounce</button>
-              </div>
-              <div class="checkbox-group d-flex align-items-center gap-2">
+              <div class="d-flex align-items-center gap-2 checkbox-group mt-2">
                 <input type="checkbox" id="marqueeFade" onchange="setMarqueeFade(this)">
-                <label for="marqueeFade">Faded edges</label>
+                <label for="marqueeFade">Fade Edges</label>
               </div>
             </div>
-
             <div class="mt-2">
               <div class="slider-label d-flex justify-content-between mb-1">
                 <span>Speed</span>
-                <span id="speedValue">2s</span>
+                <span id="speedLabel">8s</span>
               </div>
-              <input type="range" class="slider" id="animSpeed" min="0.5" max="10" step="0.1" value="2">
+              <input type="range" class="slider" id="animSpeed" min="2" max="24" step="0.5" value="8">
             </div>
           </div>
 
@@ -357,22 +335,29 @@
 
       <div class="tool-output">
         <div>
-          <div class="panel-header">Preview</div>
-          <div class="preview-area">
-            <div id="previewContent"></div>
+          <div class="panel-header">Live Preview <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.7rem">(uses loaded font)</span></div>
+          <div class="preview-area" style="justify-content:flex-start;padding:0.75rem 1rem;">
+            <div class="marquee-preview overflow-hidden w-100 d-flex align-items-center" id="marqBox">
+              <div class="marquee-track d-inline-block text-nowrap" id="marqTrack">
+                <span class="marquee-text" id="marqSpan"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="panel-header">Generated Code</div>
+          <div class="panel-header mt-3">Code</div>
           <div class="code-output" id="codeOutput"></div>
-
-          <button class="copy-btn" id="copyBtn" onclick="copyCode()">Copy Code</button>
+          <p class="embed-status" id="embedStatus">Click "Process SVG" to generate the SVG code.</p>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="copy-btn" id="embedBtn" onclick="embedFont()" style="flex:1">Process SVG</button>
+            <button class="secondary-btn" id="copyBtn" disabled onclick="copyCode()">Copy Code</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="svg-generator.js"></script>
+  <script src="experimental.js"></script>
   <script>_renderFooter();</script>
 </body>
 </html>

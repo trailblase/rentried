@@ -178,18 +178,6 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-function copyOutput() {
-  const output = document.getElementById('output');
-  navigator.clipboard.writeText(output.textContent);
-  const btn = document.getElementById('copyBtn');
-  const originalText = btn.textContent;
-  btn.textContent = 'Copied!';
-  btn.classList.add('copied');
-  setTimeout(() => {
-    btn.textContent = originalText;
-    btn.classList.remove('copied');
-  }, 2000);
-}
 
 document.getElementById('textInput').addEventListener('input', generate);
 

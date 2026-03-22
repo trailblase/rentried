@@ -96,8 +96,6 @@ let state = {
   marqueeFade: false
 };
 
-// builds the font picker grid at the top
-// each font displays in its own typeface so you can see what it looks like
 function initFontGrid() {
   const grid = document.getElementById('fontGrid');
   fonts.forEach((font, index) => {
@@ -110,7 +108,6 @@ function initFontGrid() {
   });
 }
 
-// handles clicking on a font in the grid
 function selectFont(index) {
   state.font = fonts[index];
   // update the visual selection (remove from old, add to new)
@@ -120,7 +117,6 @@ function selectFont(index) {
   updatePreview();
 }
 
-// switch between single line and multiline mode, since they behave differently in svg ouput
 function setTextMode(mode) {
   state.textMode = mode;
   document.querySelectorAll('[data-mode]').forEach(btn => {
@@ -129,19 +125,17 @@ function setTextMode(mode) {
   updatePreview();
 }
 
-// toggle between solid color and gradient
 function setColorMode(mode) {
   state.colorMode = mode; //the current color mode
   document.querySelectorAll('[data-color]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.color === mode);
   });
-  // show/hide the appropriate color controls
+  
   document.getElementById('solidColorSection').style.display = mode === 'solid' ? 'block' : 'none';
   document.getElementById('gradientColorSection').style.display = mode === 'gradient' ? 'block' : 'none';
   updatePreview();
 }
 
-// changes gradient direction (left, right, up, down); rwquries updating for the preview box
 function setGradientDir(dir) {
   state.gradientDir = dir;
   document.querySelectorAll('.direction-btn').forEach(btn => {
@@ -150,21 +144,19 @@ function setGradientDir(dir) {
   updatePreview();
 }
 
-// toggle bold/italic/blur effects, can be simm and i'll update later with more options (strikethrough)
 function toggleEffect(effect) {
   state.effects[effect] = !state.effects[effect];
   document.querySelector(`[data-effect="${effect}"]`).classList.toggle('selected');
   updatePreview();
 }
 
-// pick which animation to use (default is none or static)
 function setAnimation(anim) {
   state.animation = anim;
   document.querySelectorAll('.animation-option').forEach(opt => {
     opt.classList.toggle('selected', opt.dataset.anim === anim);
   });
   const dirRow = document.getElementById('marqueeDirRow');
-  if (dirRow) dirRow.style.display = anim === 'marquee' ? '' : 'none';
+  if (dirRow) dirRow.style.display = (anim === 'marquee') ? '' : 'none';
   updatePreview();
 }
 
@@ -172,6 +164,7 @@ function setMarqueeDir(dir) {
   state.marqueeDir = dir;
   document.getElementById('dirLtr').classList.toggle('active', dir === 'ltr');
   document.getElementById('dirRtl').classList.toggle('active', dir === 'rtl');
+  document.getElementById('dirBounce').classList.toggle('active', dir === 'bounce');
   updatePreview();
 }
 
@@ -179,8 +172,6 @@ function setMarqueeFade(el) {
   state.marqueeFade = el.checked;
   updatePreview();
 }
-
-// text alignment (left, center, right)
 function setTextAlign(align) {
   state.textAlign = align;
   document.querySelectorAll('[data-align]').forEach(btn => {
@@ -189,7 +180,6 @@ function setTextAlign(align) {
   updatePreview();
 }
 
-// show/hide underline or overline settings when checkbox is toggled (independntly)
 function toggleDecoration(type) {
   if (type === 'underline') {
     state.underline.enabled = document.getElementById('underlineEnabled').checked;
@@ -201,7 +191,6 @@ function toggleDecoration(type) {
   updatePreview();
 }
 
-// underline style: solid, dashed, or wavy (will add dotted later, the wavy one is broken too
 function setUnderlineStyle(style) {
   state.underline.style = style;
   document.querySelectorAll('.underline-style').forEach(opt => {
@@ -210,7 +199,6 @@ function setUnderlineStyle(style) {
   updatePreview();
 }
 
-// same thing but for overline
 function setOverlineStyle(style) {
   state.overline.style = style;
   document.querySelectorAll('.overline-style').forEach(opt => {
@@ -218,29 +206,25 @@ function setOverlineStyle(style) {
   });
   updatePreview();
 }
-
-// flip the text horizontal or vertical, usually on multiline will result in upside-down text
+// requires some fixing later since some animations dont account for flipping
 function toggleTransform(type) {
   state.transform[type] = !state.transform[type];
   document.querySelector(`[data-transform="${type}"]`).classList.toggle('selected');
   updatePreview();
 }
 
-// glow effect <3
 function toggleGlow() {
   state.glowEnabled = document.getElementById('glowEnabled').checked;
   document.getElementById('glowSettings').classList.toggle('visible', state.glowEnabled);
   updatePreview();
 }
 
-// shadow toggle
 function toggleShadow() {
   state.shadowEnabled = document.getElementById('shadowEnabled').checked;
   document.getElementById('shadowSettings').classList.toggle('visible', state.shadowEnabled);
   updatePreview();
 }
 
-// outline/stroke for the text
 function toggleOutline() {
   state.outlineEnabled = document.getElementById('outlineEnabled').checked;
   document.getElementById('outlineSettings').classList.toggle('visible', state.outlineEnabled);
@@ -252,28 +236,23 @@ function toggleOutline() {
 // this is kinda long but pretty straightforward
 
 function initEventListeners() {
-  // main text input - updates as you type
   document.getElementById('textInput').addEventListener('input', (e) => {
     state.text = e.target.value;
     updatePreview();
   });
 
-  // font size slider
   document.getElementById('fontSize').addEventListener('input', (e) => {
     state.fontSize = parseInt(e.target.value) || 18;
     updatePreview();
   });
 
-  // solid color picker, synced
   document.getElementById('solidColor').addEventListener('input', (e) => {
     state.solidColor = e.target.value;
     document.getElementById('solidColorHex').value = e.target.value;
     updatePreview();
   });
 
-  // hex input for solid color, has validation function
   document.getElementById('solidColorHex').addEventListener('input', (e) => {
-    // only accept valid hex colors
     if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
       state.solidColor = e.target.value;
       document.getElementById('solidColor').value = e.target.value;
@@ -281,8 +260,7 @@ function initEventListeners() {
     }
   });
 
-  // gradient start color, too lazy to optimise the same damn function
-  document.getElementById('gradientStart').addEventListener('input', (e) => {
+    document.getElementById('gradientStart').addEventListener('input', (e) => {
     state.gradientStart = e.target.value;
     document.getElementById('gradientStartHex').value = e.target.value;
     updatePreview();
@@ -295,9 +273,7 @@ function initEventListeners() {
       updatePreview();
     }
   });
-
-  // gradient end color + hex input same with the first color
-  document.getElementById('gradientEnd').addEventListener('input', (e) => {
+    document.getElementById('gradientEnd').addEventListener('input', (e) => {
     state.gradientEnd = e.target.value;
     document.getElementById('gradientEndHex').value = e.target.value;
     updatePreview();
@@ -311,7 +287,6 @@ function initEventListeners() {
     }
   });
 
-  // opacity sliders
   document.getElementById('solidOpacity').addEventListener('input', (e) => {
     state.solidOpacity = parseFloat(e.target.value);
     document.getElementById('solidOpacityValue').textContent = Math.round(state.solidOpacity * 100) + '%';
@@ -324,7 +299,6 @@ function initEventListeners() {
     updatePreview();
   });
 
-  // glow settings
   document.getElementById('glowEnabled').addEventListener('change', toggleGlow);
 
   document.getElementById('glowColor').addEventListener('input', (e) => {
@@ -343,7 +317,6 @@ function initEventListeners() {
     updatePreview();
   });
 
-  // shadow settings
   document.getElementById('shadowEnabled').addEventListener('change', toggleShadow);
 
   document.getElementById('shadowColor').addEventListener('input', (e) => {
@@ -361,9 +334,7 @@ function initEventListeners() {
     document.getElementById('shadowOpacityValue').textContent = Math.round(state.shadowOpacity * 100) + '%';
     updatePreview();
   });
-
-  // shadow offset controls (act like in CSS where u ahve to specify both x and y)
-  document.getElementById('shadowX').addEventListener('input', (e) => {
+    document.getElementById('shadowX').addEventListener('input', (e) => {
     state.shadowX = parseInt(e.target.value) || 0;
     updatePreview();
   });
@@ -373,7 +344,6 @@ function initEventListeners() {
     updatePreview();
   });
 
-  // outline/stroke settings
   document.getElementById('outlineEnabled').addEventListener('change', toggleOutline);
 
   document.getElementById('outlineColor').addEventListener('input', (e) => {
@@ -386,27 +356,23 @@ function initEventListeners() {
     updatePreview();
   });
 
-  // letter spacing slider
   document.getElementById('letterSpacing').addEventListener('input', (e) => {
     state.letterSpacing = parseInt(e.target.value);
     document.getElementById('spacingValue').textContent = state.letterSpacing + 'px';
     updatePreview();
   });
 
-  // animation speed
   document.getElementById('animSpeed').addEventListener('input', (e) => {
     state.animSpeed = parseFloat(e.target.value);
     document.getElementById('speedValue').textContent = state.animSpeed + 's';
     updatePreview();
   });
 
-  // font weight dropdown
   document.getElementById('fontWeight').addEventListener('change', (e) => {
     state.fontWeight = parseInt(e.target.value);
     updatePreview();
   });
 
-  // underline customization
   document.getElementById('underlineColor').addEventListener('input', (e) => {
     state.underline.color = e.target.value;
     updatePreview();
@@ -417,7 +383,6 @@ function initEventListeners() {
     updatePreview();
   });
 
-  // overline customization
   document.getElementById('overlineColor').addEventListener('input', (e) => {
     state.overline.color = e.target.value;
     updatePreview();
@@ -428,26 +393,21 @@ function initEventListeners() {
     updatePreview();
   });
 
-  // rotation slider
   document.getElementById('textRotate').addEventListener('input', (e) => {
     state.transform.rotate = parseInt(e.target.value) || 0;
     updatePreview();
   });
 }
 
-
 // this is the main function that creates the rentry-compatible svg code
 // it's pretty long because there's a lot of different options to handle
 // the output uses data uri format which rentry supports
 
-// main function that generates the svg code
 function generateCode() {
   const lines = state.textMode === 'multi' ? state.text.split('\n') : [state.text];
   const lineHeight = state.fontSize * 1.3;  // standard line height ratio
 
-  // calculate padding needed for effects that extend beyond text bounds
-  // gotta account for glow, shadow, animations etc or they get cut off
-  const effectPadding = Math.max(
+    const effectPadding = Math.max(
     state.glowEnabled ? state.glowSize * 2 : 0,
     state.shadowEnabled ? Math.abs(state.shadowY) + state.shadowBlur : 0,
     state.outlineEnabled ? state.outlineWidth * 2 : 0,
@@ -459,18 +419,13 @@ function generateCode() {
   let styles = [];
   let defs = '';
 
-  // basic font styles
   styles.push(`font-family:${state.font.family}`);
   styles.push(`font-size:${state.fontSize}px`);
 
-  // handle font weight - bold bumps to at least 700, always emit weight
-  const effectiveWeight = state.effects.bold ? Math.max(state.fontWeight, 700) : state.fontWeight;
+   const effectiveWeight = state.effects.bold ? Math.max(state.fontWeight, 700) : state.fontWeight;
   styles.push(`font-weight:${effectiveWeight}`);
 
-  // color handling is her solid or gradient
   if (state.colorMode === 'gradient') {
-    // gradient requires an svg <defs> element
-    // the %25 is url-encoded % for the data uri
     const dirs = {
       'right': { x1: '0%25', y1: '0%25', x2: '100%25', y2: '0%25' },
       'left': { x1: '100%25', y1: '0%25', x2: '0%25', y2: '0%25' },
@@ -489,17 +444,15 @@ function generateCode() {
     }
   }
 
-  // outline/stroke effect
   if (state.outlineEnabled) {
     styles.push(`stroke:${state.outlineColor.replace('#', '%23')}`);
     styles.push(`stroke-width:${state.outlineWidth}`);
-    styles.push('paint-order:stroke fill');  // makes stroke go behind fill
+    styles.push('paint-order:stroke fill');
   }
 
   if (state.effects.italic) styles.push('font-style:italic');
   if (state.letterSpacing > 0) styles.push(`letter-spacing:${state.letterSpacing}px`);
 
-  // build transform list for rotation and flips
   let transforms = [];
   if (state.transform.rotate !== 0) {
     transforms.push(`rotate%28${state.transform.rotate}deg%29`);
@@ -511,7 +464,6 @@ function generateCode() {
     transforms.push('scaleY%28-1%29');
   }
 
-  // filters for blur, shadow, glow
   let filters = [];
   let staticFilters = [];  // filters that stay constant (for glow-pulse animation)
   if (state.effects.blur) filters.push('blur%281px%29');
@@ -526,7 +478,6 @@ function generateCode() {
     filters.push(`drop-shadow%280 0 ${state.glowSize}px ${glowColorWithOpacity}%29`);
   }
 
-  // animation setup - each type needs different keyframes
   let animationProp = '';
   let animationKeyframes = '';
   const speed = state.animSpeed;
@@ -541,7 +492,6 @@ function generateCode() {
       animationKeyframes = `@keyframes pulse{0%25,100%25{opacity:1;}50%25{opacity:0.5;}}`;
       break;
     case 'glow-pulse':
-      // this one animates the glow filter itself
       const glowCol = state.glowColor.replace('#', '%23');
       const baseFilters = staticFilters.length > 0 ? staticFilters.join(' ') + ' ' : '';
       animationProp = `animation:glowp ${speed}s ease-in-out infinite`;
@@ -549,12 +499,10 @@ function generateCode() {
       filters = staticFilters.slice();
       break;
     case 'color-shift':
-      // cycles through some nice colors (might add custom rainbow filter)
       animationProp = `animation:colorshift ${speed}s linear infinite`;
       animationKeyframes = `@keyframes colorshift{0%25{fill:%23ff69b4;}33%25{fill:%2300ffff;}66%25{fill:%23ffd700;}100%25{fill:%23ff69b4;}}`;
       break;
     case 'float':
-      // similar to bounce but smoother/slower feel
       animationProp = `animation:float ${speed}s ease-in-out infinite`;
       animationKeyframes = `@keyframes float{0%25,100%25{transform:translateY%280%29;}50%25{transform:translateY%28-8px%29;}}`;
       break;
@@ -562,18 +510,19 @@ function generateCode() {
     case 'zoom':
     case 'wave':
     case 'marquee':
-      // these are handled separately below
+    case 'scroll-up':
+    case 'scroll-down':
       break;
   }
 
-  // add filters to styles (unless glow-pulse which handles it differently)
-  if (filters.length > 0 && state.animation !== 'glow-pulse') {
+    if (filters.length > 0 && state.animation !== 'glow-pulse') {
     styles.push(`filter:${filters.join(' ')}`);
   }
 
-  // some animations need transforms on a wrapper group
+  const isScrollAnim = state.animation === 'scroll-up' || state.animation === 'scroll-down';
+
   let groupTransforms = [];
-  if (state.animation !== 'marquee') {
+  if (state.animation !== 'marquee' && !isScrollAnim) {
     groupTransforms = transforms.slice();
   }
 
@@ -583,7 +532,7 @@ function generateCode() {
     groupAnimationCSS = animationProp;
     groupKeyframes = animationKeyframes;
   } else if (animationProp && state.animation !== 'wave' && state.animation !== 'wiggle' &&
-             state.animation !== 'zoom' && state.animation !== 'marquee') {
+             state.animation !== 'zoom' && state.animation !== 'marquee' && !isScrollAnim) {
     styles.push(animationProp);
     groupKeyframes = animationKeyframes;
   }
@@ -591,7 +540,6 @@ function generateCode() {
   let textContent = '';
   const textY = Math.ceil(effectPadding + state.fontSize);
 
-  // text alignment, maps to svg text-anchor attribute
   let textAnchor = 'start';
   let textX = '0';
   if (state.textAlign === 'center') {
@@ -602,12 +550,11 @@ function generateCode() {
     textX = '100%25';
   }
 
-  const useMultiline = state.textMode === 'multi' && lines.length > 1 && state.animation !== 'marquee';
-  const displayText = state.animation === 'marquee' ? state.text.replace(/\n/g, ' ') : state.text;
+  const useMultiline = state.textMode === 'multi' && lines.length > 1 && state.animation !== 'marquee' && !isScrollAnim;
+  const displayText = (state.animation === 'marquee' || isScrollAnim) ? state.text.replace(/\n/g, ' ') : state.text;
 
   let extraStyles = '';
 
-  // wave animation - SMIL animate on y attribute, one <text> per letter
   if (state.animation === 'wave') {
     const delay = 0.1;
     const charWidth = state.fontSize * 0.6;
@@ -646,23 +593,52 @@ function generateCode() {
     const text = displayText;
     const marqueeStyles = styles.join(';');
     const dir = state.marqueeDir || 'rtl';
-    const fromX = dir === 'ltr' ? '-100%25' : '100%25';
-    const toX   = dir === 'ltr' ? '100%25'  : '-100%25';
-    const keyframes = `@keyframes marq{from{transform:translateX%28${fromX}%29;}to{transform:translateX%28${toX}%29;}}`;
-    const animStyle = `animation:marq ${speed * 3}s linear infinite;transform-box:view-box`;
-    const textEl = `<text x='0' y='${textY}' text-anchor='start'>${escapeText(text)}</text>`;
+    const isVert = dir === 'up' || dir === 'down';
+    let keyframes, textEl;
+    if (isVert) {
+      const fromY = dir === 'up' ? '100%25' : '-100%25';
+      const toY   = dir === 'up' ? '-100%25' : '100%25';
+      keyframes = `@keyframes marq{from{transform:translateY%28${fromY}%29;}to{transform:translateY%28${toY}%29;}}`;
+      textEl = `<text x='50%25' y='${textY}' text-anchor='middle'>${escapeText(text)}</text>`;
+    } else if (dir === 'bounce') {
+      keyframes = `@keyframes marq{0%25,100%25{transform:translateX%2880%25%29;}50%25{transform:translateX%28-80%25%29;}}`;
+      textEl = `<text x='0' y='${textY}' text-anchor='start'>${escapeText(text)}</text>`;
+    } else {
+      const fromX = dir === 'ltr' ? '-100%25' : '100%25';
+      const toX   = dir === 'ltr' ? '100%25'  : '-100%25';
+      keyframes = `@keyframes marq{from{transform:translateX%28${fromX}%29;}to{transform:translateX%28${toX}%29;}}`;
+      textEl = `<text x='0' y='${textY}' text-anchor='start'>${escapeText(text)}</text>`;
+    }
+    const animStyle = dir === 'bounce'
+      ? `animation:marq ${speed * 3}s ease-in-out infinite;transform-box:view-box`
+      : `animation:marq ${speed * 3}s linear infinite;transform-box:view-box`;
     const allStyles = `text{${marqueeStyles}}${keyframes}`;
     let scrollGroup;
-    if (state.marqueeFade) {
+    if (state.marqueeFade && !isVert) {
       defs += `<defs><mask id='fadeMask'><rect width='100%25' height='100%25' fill='white'/><rect width='15%25' height='100%25' fill='url%28%23fadeL%29'/><rect x='85%25' width='15%25' height='100%25' fill='url%28%23fadeR%29'/></mask><linearGradient id='fadeL' x1='0' x2='1'><stop offset='0' stop-color='black'/><stop offset='1' stop-color='white'/></linearGradient><linearGradient id='fadeR' x1='0' x2='1'><stop offset='0' stop-color='white'/><stop offset='1' stop-color='black'/></linearGradient></defs>`;
+      scrollGroup = `<g style='mask:url%28%23fadeMask%29'><g style='${animStyle}'>${textEl}</g></g>`;
+    } else if (state.marqueeFade && isVert) {
+      defs += `<defs><mask id='fadeMask'><rect width='100%25' height='100%25' fill='white'/><rect width='100%25' height='15%25' fill='url%28%23fadeT%29'/><rect y='85%25' width='100%25' height='15%25' fill='url%28%23fadeB%29'/></mask><linearGradient id='fadeT' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='black'/><stop offset='1' stop-color='white'/></linearGradient><linearGradient id='fadeB' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='white'/><stop offset='1' stop-color='black'/></linearGradient></defs>`;
       scrollGroup = `<g style='mask:url%28%23fadeMask%29'><g style='${animStyle}'>${textEl}</g></g>`;
     } else {
       scrollGroup = `<g style='${animStyle}'>${textEl}</g>`;
     }
     const svg = `![](data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'>${defs}<style>/*<![CDATA[*/${allStyles}/*]]>*/</style>${scrollGroup}</svg>){100%:${totalHeight}}`;
     return svg;
+  } else if (isScrollAnim) {
+    const text = displayText;
+    const marqueeStyles = styles.join(';');
+    const up = state.animation === 'scroll-up';
+    const fromY = up ? '100%25' : '-100%25';
+    const toY   = up ? '-100%25' : '100%25';
+    const keyframes = `@keyframes marqv{from{transform:translateY%28${fromY}%29;}to{transform:translateY%28${toY}%29;}}`;
+    const animStyle = `animation:marqv ${speed * 3}s linear infinite;transform-box:view-box`;
+    const textEl = `<text x='50%25' y='${textY}' text-anchor='middle'>${escapeText(text)}</text>`;
+    const allStyles = `text{${marqueeStyles}}${keyframes}`;
+    const scrollGroup = `<g style='${animStyle}'>${textEl}</g>`;
+    const svg = `![](data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'>${defs}<style>/*<![CDATA[*/${allStyles}/*]]>*/</style>${scrollGroup}</svg>){100%:${totalHeight}}`;
+    return svg;
   } else if (state.animation === 'wiggle' || state.animation === 'zoom') {
-    // wiggle rotates back and forth, zoom scales up and down
     const animName = state.animation;
     const keyframes = animName === 'wiggle'
       ? `@keyframes ${animName}{0%25,100%25{transform:rotate%280deg%29;}25%25{transform:rotate%283deg%29;}75%25{transform:rotate%28-3deg%29;}}`
@@ -679,23 +655,19 @@ function generateCode() {
       textContent = `<text x='${textX}' y='${textY}' text-anchor='${textAnchor}'>${escapeText(displayText)}</text>`;
     }
   } else if (useMultiline) {
-    // regular multiline text using tspan elements
     const tspans = lines.map((line, i) => {
       return `<tspan x='${textX}' ${i === 0 ? `y='${textY}'` : `dy='${Math.ceil(lineHeight)}'`}>${escapeText(line)}</tspan>`;
     }).join('');
     textContent = `<text text-anchor='${textAnchor}'>${tspans}</text>`;
   } else {
-    // single line text
     textContent = `<text x='${textX}' y='${textY}' text-anchor='${textAnchor}'>${escapeText(displayText)}</text>`;
   }
 
-  // underline and overline decorations
   // had to do these manually because svg text-decoration doesn't work well in data uris
   let decorationElements = '';
   if (state.underline.enabled || state.overline.enabled) {
     const charWidth = state.fontSize * 0.6;
 
-    // helper to build wavy line path
     function buildWavyPath(width, y, amp, wl) {
       const numSegments = Math.ceil((width * 2) / wl) + 2;
       let path = `M 0 ${y} q ${wl/4} ${-amp} ${wl/2} 0`;
@@ -705,8 +677,7 @@ function generateCode() {
       return path;
     }
 
-    // generates the actual decoration lines for a text line
-    function generateLineDecor(lineText, baseY, xOffset) {
+   function generateLineDecor(lineText, baseY, xOffset) {
       let decor = '';
       const lineWidth = lineText.length * charWidth + state.letterSpacing * Math.max(0, lineText.length - 1);
       const ulY = baseY + state.fontSize * 0.15;
@@ -737,7 +708,6 @@ function generateCode() {
       return decor;
     }
 
-    // position decorations based on text alignment
     if (useMultiline) {
       lines.forEach((line, i) => {
         const lineY = textY + i * Math.ceil(lineHeight);
@@ -786,9 +756,7 @@ function generateCode() {
     }
   }
 
-  // put it all together - the final svg data uri
-  // the {100%:height} at the end is rentry's syntax for responsive width
-  const allExtraStyles = extraStyles + groupKeyframes;
+    const allExtraStyles = extraStyles + groupKeyframes;
   const svg = `![](data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'>${defs}<style>/*<![CDATA[*/text{${styleStr}}${allExtraStyles}/*]]>*/</style>${content}</svg>){100%:${totalHeight}}`;
 
   return svg;
@@ -808,7 +776,6 @@ function escapeText(text) {
     .replace(/#/g, '%23');
 }
 
-// convert hex color to rgba with opacity (url-encoded version)
 function hexToRgba(hex, opacity) {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -816,7 +783,6 @@ function hexToRgba(hex, opacity) {
   return `rgba%28${r},${g},${b},${opacity}%29`;
 }
 
-// same but without url encoding (for preview)
 function hexToRgbaPlain(hex, opacity) {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -935,6 +901,8 @@ function updatePreview() {
     case 'zoom':
     case 'wave':
     case 'marquee':
+    case 'scroll-up':
+    case 'scroll-down':
       break;
   }
 
@@ -942,8 +910,10 @@ function updatePreview() {
     styles.push(`filter:${filters.join(' ')}`);
   }
 
+  const isScrollAnim = state.animation === 'scroll-up' || state.animation === 'scroll-down';
+
   let groupTransforms = [];
-  if (state.animation !== 'marquee') {
+  if (state.animation !== 'marquee' && !isScrollAnim) {
     groupTransforms = transforms.slice();
   }
 
@@ -953,7 +923,7 @@ function updatePreview() {
     groupAnimationCSS = animationProp;
     groupKeyframes = animationKeyframes;
   } else if (animationProp && state.animation !== 'wave' && state.animation !== 'wiggle' &&
-             state.animation !== 'zoom' && state.animation !== 'marquee') {
+             state.animation !== 'zoom' && state.animation !== 'marquee' && !isScrollAnim) {
     styles.push(animationProp);
     groupKeyframes = animationKeyframes;
   }
@@ -973,8 +943,8 @@ function updatePreview() {
   let extraStyles = '';
   let allExtraStyles = '';
 
-  const useMultiline = state.textMode === 'multi' && lines.length > 1 && state.animation !== 'marquee';
-  const displayText = state.animation === 'marquee' ? state.text.replace(/\n/g, ' ') : state.text;
+  const useMultiline = state.textMode === 'multi' && lines.length > 1 && state.animation !== 'marquee' && !isScrollAnim;
+  const displayText = (state.animation === 'marquee' || isScrollAnim) ? state.text.replace(/\n/g, ' ') : state.text;
 
   if (state.animation === 'wave') {
     const delay = 0.1;
@@ -1013,19 +983,45 @@ function updatePreview() {
   } else if (state.animation === 'marquee') {
     const text = displayText;
     const dir = state.marqueeDir || 'rtl';
-    const fromX = dir === 'ltr' ? '-100%' : '100%';
-    const toX   = dir === 'ltr' ? '100%'  : '-100%';
-    extraStyles = `@keyframes marq{from{transform:translateX(${fromX});}to{transform:translateX(${toX});}}`;
-    const animStyle = `animation:marq ${speed * 3}s linear infinite;transform-box:view-box`;
-    const textEl = `<text x="0" y="${textY}" text-anchor="start">${escapeHTML(text)}</text>`;
-    if (state.marqueeFade) {
+    const isVert = dir === 'up' || dir === 'down';
+    let textEl;
+    if (isVert) {
+      const fromY = dir === 'up' ? '100%' : '-100%';
+      const toY   = dir === 'up' ? '-100%' : '100%';
+      extraStyles = `@keyframes marq{from{transform:translateY(${fromY});}to{transform:translateY(${toY});}}`;
+      textEl = `<text x="50%" y="${textY}" text-anchor="middle">${escapeHTML(text)}</text>`;
+    } else if (dir === 'bounce') {
+      extraStyles = `@keyframes marq{0%,100%{transform:translateX(80%);}50%{transform:translateX(-80%);}}`;
+      textEl = `<text x="0" y="${textY}" text-anchor="start">${escapeHTML(text)}</text>`;
+    } else {
+      const fromX = dir === 'ltr' ? '-100%' : '100%';
+      const toX   = dir === 'ltr' ? '100%'  : '-100%';
+      extraStyles = `@keyframes marq{from{transform:translateX(${fromX});}to{transform:translateX(${toX});}}`;
+      textEl = `<text x="0" y="${textY}" text-anchor="start">${escapeHTML(text)}</text>`;
+    }
+    const animStyle = dir === 'bounce'
+      ? `animation:marq ${speed * 3}s ease-in-out infinite;transform-box:view-box`
+      : `animation:marq ${speed * 3}s linear infinite;transform-box:view-box`;
+    if (state.marqueeFade && !isVert) {
       defs += `<defs><mask id="fadeMask"><rect width="100%" height="100%" fill="white"/><rect width="15%" height="100%" fill="url(#fadeL)"/><rect x="85%" width="15%" height="100%" fill="url(#fadeR)"/></mask><linearGradient id="fadeL" x1="0" x2="1"><stop offset="0" stop-color="black"/><stop offset="1" stop-color="white"/></linearGradient><linearGradient id="fadeR" x1="0" x2="1"><stop offset="0" stop-color="white"/><stop offset="1" stop-color="black"/></linearGradient></defs>`;
+      textContent = `<g style="mask:url(#fadeMask)"><g style="${animStyle}">${textEl}</g></g>`;
+      groupAnimationCSS = '';
+    } else if (state.marqueeFade && isVert) {
+      defs += `<defs><mask id="fadeMask"><rect width="100%" height="100%" fill="white"/><rect width="100%" height="15%" fill="url(#fadeT)"/><rect y="85%" width="100%" height="15%" fill="url(#fadeB)"/></mask><linearGradient id="fadeT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="black"/><stop offset="1" stop-color="white"/></linearGradient><linearGradient id="fadeB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="white"/><stop offset="1" stop-color="black"/></linearGradient></defs>`;
       textContent = `<g style="mask:url(#fadeMask)"><g style="${animStyle}">${textEl}</g></g>`;
       groupAnimationCSS = '';
     } else {
       textContent = textEl;
       groupAnimationCSS = animStyle;
     }
+  } else if (isScrollAnim) {
+    const up = state.animation === 'scroll-up';
+    const fromY = up ? '100%' : '-100%';
+    const toY   = up ? '-100%' : '100%';
+    extraStyles = `@keyframes marqv{from{transform:translateY(${fromY});}to{transform:translateY(${toY});}}`;
+    const animStyle = `animation:marqv ${speed * 3}s linear infinite;transform-box:view-box`;
+    textContent = `<text x="50%" y="${textY}" text-anchor="middle">${escapeHTML(displayText)}</text>`;
+    groupAnimationCSS = animStyle;
   } else if (state.animation === 'wiggle' || state.animation === 'zoom') {
     const animName = state.animation;
     const keyframes = animName === 'wiggle'
@@ -1051,7 +1047,6 @@ function updatePreview() {
     textContent = `<text x="${textX}" y="${textY}" text-anchor="${textAnchor}">${escapeHTML(displayText)}</text>`;
   }
 
-  // decoration rendering for preview (same logic as generateCode but cleaner svg)
   let decorationElements = '';
   if (state.underline.enabled || state.overline.enabled) {
     const charWidth = state.fontSize * 0.6;
@@ -1147,7 +1142,6 @@ function updatePreview() {
   document.getElementById('previewContent').innerHTML = previewSVG;
 }
 
-// basic html escaping for preview (not url-encoded)
 function escapeHTML(text) {
   return text
     .replace(/&/g, '&amp;')
@@ -1157,22 +1151,6 @@ function escapeHTML(text) {
     .replace(/'/g, '&#39;');
 }
 
-// copy button handler
-// shows "Copied!" feedback for a couple seconds
-function copyCode() {
-  const code = document.getElementById('codeOutput').textContent;
-  navigator.clipboard.writeText(code).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = 'Copy Code';
-      btn.classList.remove('copied');
-    }, 2000);
-  });
-}
-
-// kick everything off when the page loads
 document.addEventListener('DOMContentLoaded', () => {
   initFontGrid();
   initEventListeners();

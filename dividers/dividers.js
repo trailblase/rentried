@@ -267,12 +267,4 @@ function generate() {
   document.getElementById('output').textContent = rentryCode;
 }
 
-function copyOutput() {
-  navigator.clipboard.writeText(document.getElementById('output').textContent);
-  const btn = document.getElementById('copyBtn');
-  btn.textContent = 'Copied!';
-  btn.classList.add('copied');
-  setTimeout(() => { btn.textContent = 'Copy Code'; btn.classList.remove('copied'); }, 2000);
-}
-
 generate();
