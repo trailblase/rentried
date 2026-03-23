@@ -25,7 +25,7 @@
 
         <div>
           <div class="panel-header">Spinning Text</div>
-          <textarea class="text-input" id="spinText" placeholder="Text that spins around the circle..." style="min-height:60px;resize:vertical">This is a circular circle amazing? Isn't it?</textarea>
+          <textarea class="text-input" id="spinText" placeholder="Text that spins around the circle...">This is a circular circle amazing? Isn't it?</textarea>
           <div class="d-flex align-items-center gap-2 mt-2">
             <label class="ctrl-label">Size:</label>
             <input type="number" class="number-input" id="fontSize" value="13" min="8" max="26">
@@ -161,6 +161,8 @@
 
       <div class="tool-output">
         <div>
+          <!-- fix the preview stretching issue on smaller screens (same like on gradient)-->
+           <!-- kms this is annoying -->
           <div class="panel-header">Preview</div>
           <div class="preview-area preview-widget" style="min-height:240px; padding:1rem; display:flex; align-items:center; justify-content:center">
             <div id="previewContent"></div>

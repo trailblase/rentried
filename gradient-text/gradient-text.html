@@ -25,7 +25,8 @@
 
         <div>
           <div class="panel-header">Text Input</div>
-          <textarea class="text-input" id="textInput" placeholder="Enter your text here..." style="min-height: 80px;">Hello World!</textarea>
+          <!-- fix the stretching corner option -->
+          <textarea class="text-input" id="textInput" placeholder="Enter your text here...">Hello World!</textarea>
         </div>
 
         <div>
@@ -72,7 +73,7 @@
             <span class="section-label d-block mb-1">Quick presets</span>
             <div class="presets-grid">
               <button class="preset-btn" style="background: linear-gradient(to right, #FF0000, #FF8800, #FFFF00, #00FF00, #00FFFF, #0000FF, #8800FF)" onclick="applyPreset(['#FF0000','#FF8800','#FFFF00','#00FF00','#00FFFF','#0000FF','#8800FF'])" title="Rainbow"></button>
-              <button class="preset-btn" style="background: linear-gradient(to right, #FF69B4, #00FFFF)" onclick="applyPreset(['#FF69B4','#00FFFF'])" title="Pink Cyan"></button>
+              <button class="preset-btn" style="background: linear-gradient(to right, #FF69B4, #46ccf5)" onclick="applyPreset(['#FF69B4','#46ccf5'])" title="Cotton Candy"></button>
               <button class="preset-btn" style="background: linear-gradient(to right, #FF6B6B, #FFA500, #FFD93D)" onclick="applyPreset(['#FF6B6B','#FFA500','#FFD93D'])" title="Sunset"></button>
               <button class="preset-btn" style="background: linear-gradient(to right, #667eea, #764ba2, #f093fb)" onclick="applyPreset(['#667eea','#764ba2','#f093fb'])" title="Purple Dream"></button>
               <button class="preset-btn" style="background: linear-gradient(to right, #11998e, #38ef7d)" onclick="applyPreset(['#11998e','#38ef7d'])" title="Mint"></button>
@@ -87,6 +88,7 @@
 
       <div class="tool-output">
         <div>
+          <!-- fix preview stretching when text gets wider than the viewport on smaller screens-->
           <div class="panel-header">Preview</div>
           <div class="preview-area" id="preview" style="min-height: 80px; font-size: 1.25rem; font-weight: 500; letter-spacing: 0.01em;"></div>
         </div>
