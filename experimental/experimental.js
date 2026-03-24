@@ -259,6 +259,7 @@ function embedFont() {
       buildSVG(fam, b64arr);
       btn.disabled = false;
       el('copyBtn').disabled = false;
+      el('gifBtn').disabled = false;
       var kb = Math.round(b64arr.reduce(function(s, b) { return s + b.length * 0.75; }, 0) / 1024);
       setStatus('Done! ~' + kb + ' KB across ' + b64arr.length + ' subset(s).');
     })
@@ -442,3 +443,120 @@ on('animSpeed', 'input', function(e) {
 });
 
 updateLivePreview();
+
+function saveAsGif() {
+  var codeText = el('codeOutput').textContent;
+  if (!codeText) { setStatus('Generate the SVG first.'); return; }
+
+  var match = codeText.match(/data:image\/svg\+xml;base64,([A-Za-z0-9+/=]+)/);
+  if (!match) { setStatus('No SVG found.'); return; }
+
+  var svgContent = atob(match[1]);
+
+  var wMatch = svgContent.match(/width="(\d+)"/);
+  var hMatch = svgContent.match(/height="(\d+)"/);
+  var W = wMatch ? parseInt(wMatch[1]) : 700;
+  var H = hMatch ? parseInt(hMatch[1]) : 80;
+
+  var fps = 20;
+  var totalFrames = Math.min(Math.ceil(state.animSpeed * fps), 300);
+  var frameDelay = Math.round(state.animSpeed * 1000 / totalFrames);
+
+  setStatus('Loading GIF encoder\u2026');
+  el('gifBtn').disabled = true;
+
+  fetch('https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js')
+    .then(function(r) { return r.blob(); })
+    .then(function(workerBlob) {
+      var workerUrl = URL.createObjectURL(workerBlob);
+
+      var gif = new window.GIF({
+        workers: 2,
+        quality: 10,
+        width: W,
+        height: H,
+        workerScript: workerUrl,
+        transparent: 0x000000
+      });
+
+      var canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      var ctx = canvas.getContext('2d');
+      var framesAdded = 0;
+
+      function buildFrameSvg(progress) {
+        var x = state.marqueeType === 'ltr'
+          ? Math.round(-W + 2 * W * progress)
+          : Math.round(W - 2 * W * progress);
+        return svgContent.replace(
+          /style="animation:marq[^"]*"/,
+          'transform="translate(' + x + ',0)"'
+        );
+      }
+
+      gif.on('progress', function(p) {
+        setStatus('Encoding GIF\u2026 ' + Math.round(p * 100) + '%');
+      });
+
+      gif.on('finished', function(blob) {
+        URL.revokeObjectURL(workerUrl);
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'marquee.gif';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+        el('gifBtn').disabled = false;
+        setStatus('GIF saved!');
+      });
+
+      function processFrame(i) {
+        if (i >= totalFrames) {
+          if (framesAdded === 0) {
+            URL.revokeObjectURL(workerUrl);
+            el('gifBtn').disabled = false;
+            setStatus('Error: no frames could be captured.');
+            return;
+          }
+          setStatus('Encoding GIF\u2026');
+          gif.render();
+          return;
+        }
+        var frameSvg = buildFrameSvg(i / totalFrames);
+        var blob = new Blob([frameSvg], { type: 'image/svg+xml;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var img = new Image();
+        img.onload = function() {
+          ctx.clearRect(0, 0, W, H);
+          ctx.drawImage(img, 0, 0, W, H);
+          try {
+            var id = ctx.getImageData(0, 0, W, H);
+            var d = id.data;
+            for (var j = 0; j < d.length; j += 4) {
+              if (d[j + 3] < 128) { d[j] = 0; d[j+1] = 0; d[j+2] = 0; d[j+3] = 255; }
+            }
+            ctx.putImageData(id, 0, 0);
+          } catch(e) { /* fallback to original image */ }
+          gif.addFrame(ctx, { copy: true, delay: frameDelay });
+          URL.revokeObjectURL(url);
+          framesAdded++;
+          setStatus('Capturing frame ' + framesAdded + '/' + totalFrames + '\u2026');
+          processFrame(i + 1);
+        };
+        img.onerror = function() {
+          URL.revokeObjectURL(url);
+          processFrame(i + 1);
+        };
+        img.src = url;
+      }
+
+      processFrame(0);
+    })
+    .catch(function(err) {
+      el('gifBtn').disabled = false;
+      setStatus('Error: ' + (err && err.message ? err.message : String(err)));
+    });
+}

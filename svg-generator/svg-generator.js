@@ -550,8 +550,8 @@ function generateCode() {
     textX = '100%25';
   }
 
-  const useMultiline = state.textMode === 'multi' && lines.length > 1 && state.animation !== 'marquee' && !isScrollAnim;
-  const displayText = (state.animation === 'marquee' || isScrollAnim) ? state.text.replace(/\n/g, ' ') : state.text;
+  const useMultiline = state.textMode === 'multi' && lines.length > 1 && state.animation !== 'marquee';
+  const displayText = state.animation === 'marquee' ? state.text.replace(/\n/g, ' ') : state.text;
 
   let extraStyles = '';
 
@@ -626,14 +626,21 @@ function generateCode() {
     const svg = `![](data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'>${defs}<style>/*<![CDATA[*/${allStyles}/*]]>*/</style>${scrollGroup}</svg>){100%:${totalHeight}}`;
     return svg;
   } else if (isScrollAnim) {
-    const text = displayText;
     const marqueeStyles = styles.join(';');
     const up = state.animation === 'scroll-up';
     const fromY = up ? '100%25' : '-100%25';
     const toY   = up ? '-100%25' : '100%25';
     const keyframes = `@keyframes marqv{from{transform:translateY%28${fromY}%29;}to{transform:translateY%28${toY}%29;}}`;
     const animStyle = `animation:marqv ${speed * 3}s linear infinite;transform-box:view-box`;
-    const textEl = `<text x='50%25' y='${textY}' text-anchor='middle'>${escapeText(text)}</text>`;
+    let textEl;
+    if (useMultiline) {
+      const tspans = lines.map((line, i) =>
+        `<tspan x='${textX}' ${i === 0 ? `y='${textY}'` : `dy='${Math.ceil(lineHeight)}'`}>${escapeText(line)}</tspan>`
+      ).join('');
+      textEl = `<text text-anchor='${textAnchor}'>${tspans}</text>`;
+    } else {
+      textEl = `<text x='50%25' y='${textY}' text-anchor='middle'>${escapeText(displayText)}</text>`;
+    }
     const allStyles = `text{${marqueeStyles}}${keyframes}`;
     const scrollGroup = `<g style='${animStyle}'>${textEl}</g>`;
     const svg = `![](data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'>${defs}<style>/*<![CDATA[*/${allStyles}/*]]>*/</style>${scrollGroup}</svg>){100%:${totalHeight}}`;
@@ -943,8 +950,8 @@ function updatePreview() {
   let extraStyles = '';
   let allExtraStyles = '';
 
-  const useMultiline = state.textMode === 'multi' && lines.length > 1 && state.animation !== 'marquee' && !isScrollAnim;
-  const displayText = (state.animation === 'marquee' || isScrollAnim) ? state.text.replace(/\n/g, ' ') : state.text;
+  const useMultiline = state.textMode === 'multi' && lines.length > 1 && state.animation !== 'marquee';
+  const displayText = state.animation === 'marquee' ? state.text.replace(/\n/g, ' ') : state.text;
 
   if (state.animation === 'wave') {
     const delay = 0.1;
@@ -1020,7 +1027,14 @@ function updatePreview() {
     const toY   = up ? '-100%' : '100%';
     extraStyles = `@keyframes marqv{from{transform:translateY(${fromY});}to{transform:translateY(${toY});}}`;
     const animStyle = `animation:marqv ${speed * 3}s linear infinite;transform-box:view-box`;
-    textContent = `<text x="50%" y="${textY}" text-anchor="middle">${escapeHTML(displayText)}</text>`;
+    if (useMultiline) {
+      const tspans = lines.map((line, i) =>
+        `<tspan x="${textX}" ${i === 0 ? `y="${textY}"` : `dy="${Math.ceil(lineHeight)}"`}>${escapeHTML(line)}</tspan>`
+      ).join('');
+      textContent = `<text text-anchor="${textAnchor}">${tspans}</text>`;
+    } else {
+      textContent = `<text x="50%" y="${textY}" text-anchor="middle">${escapeHTML(displayText)}</text>`;
+    }
     groupAnimationCSS = animStyle;
   } else if (state.animation === 'wiggle' || state.animation === 'zoom') {
     const animName = state.animation;

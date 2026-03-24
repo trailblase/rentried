@@ -157,16 +157,21 @@ document.getElementById('pfpUpload').addEventListener('change', function () {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.getElementById('resizeCanvas');
-      const ctx = canvas.getContext('2d');
-      const size = Math.min(img.width, img.height);
-      ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, 200, 200);
-      pfpDataUrl = canvas.toDataURL('image/png');
+    if (file.type === 'image/gif') {
+      pfpDataUrl = e.target.result;
       build();
-    };
-    img.src = e.target.result;
+    } else {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.getElementById('resizeCanvas');
+        const ctx = canvas.getContext('2d');
+        const size = Math.min(img.width, img.height);
+        ctx.drawImage(img, (img.width - size) / 2, (img.height - size) / 2, size, size, 0, 0, 200, 200);
+        pfpDataUrl = canvas.toDataURL('image/png');
+        build();
+      };
+      img.src = e.target.result;
+    }
   };
   reader.readAsDataURL(file);
 });

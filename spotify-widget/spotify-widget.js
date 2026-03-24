@@ -256,19 +256,25 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function (e) {
-      const img = new Image();
-      img.onload = function () {
-        const canvas = document.getElementById('resizeCanvas');
-        const ctx = canvas.getContext('2d');
-        const size = Math.min(img.width, img.height);
-        const sx = (img.width - size) / 2;
-        const sy = (img.height - size) / 2;
-        ctx.drawImage(img, sx, sy, size, size, 0, 0, 88, 88);
-        albumDataUrl = canvas.toDataURL('image/png');
+      if (file.type === 'image/gif') {
+        albumDataUrl = e.target.result;
         document.getElementById('clearAlbum').style.display = '';
         update();
-      };
-      img.src = e.target.result;
+      } else {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.getElementById('resizeCanvas');
+          const ctx = canvas.getContext('2d');
+          const size = Math.min(img.width, img.height);
+          const sx = (img.width - size) / 2;
+          const sy = (img.height - size) / 2;
+          ctx.drawImage(img, sx, sy, size, size, 0, 0, 88, 88);
+          albumDataUrl = canvas.toDataURL('image/png');
+          document.getElementById('clearAlbum').style.display = '';
+          update();
+        };
+        img.src = e.target.result;
+      }
     };
     reader.readAsDataURL(file);
   });

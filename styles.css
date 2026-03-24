@@ -49,6 +49,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+site-header,
+site-footer { display: contents; }
+
 .site-header {
   display: flex;
   align-items: center;
@@ -167,9 +170,8 @@ body {
 }
 
 textarea.text-input {
-  min-height: 80px;
+  min-height: 70px;
   resize: none;
-  field-sizing: content;
 }
 
 .section-label  { font-size: 0.75rem; color: var(--text-muted); }
@@ -613,7 +615,7 @@ select.number-input option {
   .option-btn   { padding: 0.625rem 0.375rem; font-size: 0.8rem; }
   .toggle-btn   { padding: 0.5rem 0.625rem; }
   .direction-btn { padding: 0.5rem; }
-  .copy-btn     { padding: 0.75rem; font-size: 0.875rem; }
+  .copy-btn     { padding: 1.2rem; font-size: 1rem; }
 
   .options-grid.cols-4,
   .direction-grid { grid-template-columns: repeat(2, 1fr); }

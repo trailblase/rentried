@@ -47,7 +47,7 @@
   </style>
 </head>
 <body data-page="experimental">
-  <script>_renderHeader('experimental');</script>
+  <site-header active-page="experimental"></site-header>
   <div class="page">
     <div class="mb-3">
       <p class="page-title">Experimental marquee with custom fonts</p>
@@ -350,6 +350,7 @@
           <div class="d-flex gap-2 flex-wrap">
             <button class="copy-btn" id="embedBtn" onclick="embedFont()" style="flex:1">Process SVG</button>
             <button class="secondary-btn" id="copyBtn" disabled onclick="copyCode()">Copy Code</button>
+            <button class="secondary-btn" id="gifBtn" disabled onclick="saveAsGif()">Save as GIF</button>
           </div>
         </div>
       </div>
@@ -357,7 +358,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
   <script src="experimental.js"></script>
-  <script>_renderFooter();</script>
+  <site-footer></site-footer>
 </body>
 </html>

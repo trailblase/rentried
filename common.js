@@ -21,48 +21,53 @@ function toggleTheme() {
   if (btn) btn.textContent = t === 'dark' ? '◑' : '◐';
 }
 
-function _renderHeader(activePage) {
-  var theme = localStorage.getItem('rentried-theme') || 'dark';
-  var themeIcon = theme === 'dark' ? '◑' : '◐';
+class SiteHeader extends HTMLElement {
+  connectedCallback() {
+    const activePage = this.getAttribute('active-page') || '';
+    const theme = localStorage.getItem('rentried-theme') || 'dark';
+    const themeIcon = theme === 'dark' ? '◑' : '◐';
 
-  var desktopLinks = _NAV.map(function (item, i) {
-    var active = item.key === activePage ? ' active' : '';
-    var sep = i > 0 ? '<span class="nav-sep">·</span>' : '';
-    return sep + '<a href="' + item.href + '" class="nav-link' + active + '">' + item.label + '</a>';
-  }).join('');
+    const desktopLinks = _NAV.map((item, i) => {
+      const active = item.key === activePage ? ' active' : '';
+      const sep = i > 0 ? '<span class="nav-sep">·</span>' : '';
+      return `${sep}<a href="${item.href}" class="nav-link${active}">${item.label}</a>`;
+    }).join('');
 
-  var dropdownItems = _NAV.map(function (item) {
-    var active = item.key === activePage ? ' active' : '';
-    return '<li><a class="nav-dropdown-item' + active + '" href="' + item.href + '">' + item.label + '</a></li>';
-  }).join('');
+    const dropdownItems = _NAV.map(item => {
+      const active = item.key === activePage ? ' active' : '';
+      return `<li><a class="nav-dropdown-item${active}" href="${item.href}">${item.label}</a></li>`;
+    }).join('');
 
-  var activeLabel = 'Menu';
-  for (var i = 0; i < _NAV.length; i++) {
-    if (_NAV[i].key === activePage) { activeLabel = _NAV[i].label; break; }
+    const activeItem = _NAV.find(item => item.key === activePage);
+    const activeLabel = activeItem ? activeItem.label : 'Menu';
+
+    this.innerHTML = `
+      <header class="site-header">
+        <a href="../" class="site-logo">Rentried</a>
+        <span class="nav-sep d-none d-md-inline">·</span>
+        <nav class="site-nav d-none d-md-flex">${desktopLinks}</nav>
+        <div class="dropdown d-md-none ms-2">
+          <button class="nav-dropdown-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">${activeLabel}</button>
+          <ul class="nav-dropdown-menu dropdown-menu">${dropdownItems}</ul>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">${themeIcon}</button>
+      </header>`;
   }
-
-  var html = '<header class="site-header">' +
-    '<a href="../" class="site-logo">Rentried</a>' +
-    '<span class="nav-sep d-none d-md-inline">·</span>' +
-    '<nav class="site-nav d-none d-md-flex">' + desktopLinks + '</nav>' +
-    '<div class="dropdown d-md-none ms-2">' +
-      '<button class="nav-dropdown-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">' + activeLabel + '</button>' +
-      '<ul class="nav-dropdown-menu dropdown-menu">' + dropdownItems + '</ul>' +
-    '</div>' +
-    '<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">' + themeIcon + '</button>' +
-  '</header>';
-
-  document.body.insertAdjacentHTML('afterbegin', html);
 }
 
-function _renderFooter() {
-  var html = '<footer class="site-footer">' +
-    '<div class="page">' +
-      'Not affiliated with Rentry.co · Made by <a href="https://github.com/trailblase" target="_blank">trailblase</a> · <a href="https://orion.atabook.org/" target="_blank">Contact / Issues</a>' +
-    '</div>' +
-  '</footer>';
-  document.body.insertAdjacentHTML('beforeend', html);
+class SiteFooter extends HTMLElement {
+  connectedCallback() {
+    this.innerHTML = `
+      <footer class="site-footer">
+        <div class="page">
+          Not affiliated with Rentry.co · Made by <a href="https://github.com/trailblase" target="_blank">trailblase</a> · <a href="https://orion.atabook.org/" target="_blank">Contact / Issues</a>
+        </div>
+      </footer>`;
+  }
 }
+
+customElements.define('site-header', SiteHeader);
+customElements.define('site-footer', SiteFooter);
 
 function _restoreInputs(toolName) {
   var raw = localStorage.getItem('rentried-settings-' + toolName);
