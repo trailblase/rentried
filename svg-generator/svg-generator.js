@@ -1,49 +1,10 @@
-// added fallbacks just in case someone doesn't have these installed
-const fonts = [
-  { name: 'Georgia', family: 'Georgia, serif', category: 'serif' },
-  { name: 'Times New Roman', family: 'Times New Roman, Times, serif', category: 'serif' },
-  { name: 'Palatino', family: 'Palatino Linotype, Palatino, serif', category: 'serif' },
-  { name: 'Book Antiqua', family: 'Book Antiqua, Palatino, serif', category: 'serif' },
-  { name: 'Garamond', family: 'Garamond, serif', category: 'serif' },
-  { name: 'Cambria', family: 'Cambria, serif', category: 'serif' },
-  { name: 'Didot', family: 'Didot, serif', category: 'serif' },
-  { name: 'Bodoni MT', family: 'Bodoni MT, serif', category: 'serif' },
-  { name: 'Arial', family: 'Arial, Helvetica, sans-serif', category: 'sans-serif' },
-  { name: 'Verdana', family: 'Verdana, Geneva, sans-serif', category: 'sans-serif' },
-  { name: 'Trebuchet MS', family: 'Trebuchet MS, sans-serif', category: 'sans-serif' },
-  { name: 'Tahoma', family: 'Tahoma, Geneva, sans-serif', category: 'sans-serif' },
-  { name: 'Helvetica', family: 'Helvetica, Arial, sans-serif', category: 'sans-serif' },
-  { name: 'Impact', family: 'Impact, Charcoal, sans-serif', category: 'sans-serif' },
-  { name: 'Arial Black', family: 'Arial Black, Gadget, sans-serif', category: 'sans-serif' },
-  { name: 'Lucida Sans', family: 'Lucida Sans Unicode, Lucida Grande, sans-serif', category: 'sans-serif' },
-  { name: 'Century Gothic', family: 'Century Gothic, sans-serif', category: 'sans-serif' },
-  { name: 'Segoe UI', family: 'Segoe UI, sans-serif', category: 'sans-serif' },
-  { name: 'Calibri', family: 'Calibri, sans-serif', category: 'sans-serif' },
-  { name: 'Candara', family: 'Candara, sans-serif', category: 'sans-serif' },
-  { name: 'Optima', family: 'Optima, sans-serif', category: 'sans-serif' },
-  { name: 'Gill Sans', family: 'Gill Sans, sans-serif', category: 'sans-serif' },
-  { name: 'Franklin Gothic', family: 'Franklin Gothic Medium, sans-serif', category: 'sans-serif' },
-  { name: 'Courier New', family: 'Courier New, Courier, monospace', category: 'monospace' },
-  { name: 'Lucida Console', family: 'Lucida Console, Monaco, monospace', category: 'monospace' },
-  { name: 'Consolas', family: 'Consolas, monospace', category: 'monospace' },
-  { name: 'Monaco', family: 'Monaco, monospace', category: 'monospace' },
-  { name: 'Andale Mono', family: 'Andale Mono, monospace', category: 'monospace' },
-  { name: 'Source Code Pro', family: 'Source Code Pro, monospace', category: 'monospace' },
-  { name: 'Comic Sans MS', family: 'Comic Sans MS, cursive', category: 'cursive' },
-  { name: 'Lucida Handwriting', family: 'Lucida Handwriting, cursive', category: 'cursive' },
-  { name: 'Segoe Script', family: 'Segoe Script, cursive', category: 'cursive' },
-  { name: 'Brush Script MT', family: 'Brush Script MT, cursive', category: 'cursive' },
-  { name: 'Snell Roundhand', family: 'Snell Roundhand, cursive', category: 'cursive' },
-  { name: 'Papyrus', family: 'Papyrus, fantasy', category: 'fantasy' },
-  { name: 'Copperplate', family: 'Copperplate, fantasy', category: 'fantasy' },
-];
+// fonts are loaded from fonts.json on DOMContentLoaded
+let fonts = [];
 
-// this holds all the current settings for the text, class could've been used but oh well
-// a lot of these are just default values that can be changed by the user afterwards
 let state = {
   text: 'Hello World',
   textMode: 'single',
-  font: fonts[0],
+  font: null,
   fontSize: 18,
   fontWeight: 400,
   textAlign: 'center',
@@ -399,6 +360,22 @@ function initEventListeners() {
   });
 }
 
+function measureLineWidth(text) {
+  const fontWeight = state.effects.bold ? Math.max(state.fontWeight, 700) : state.fontWeight;
+  const probe = document.createElement('span');
+  probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;' +
+    'font-family:' + state.font.family + ';' +
+    'font-size:' + state.fontSize + 'px;' +
+    'font-weight:' + fontWeight + ';' +
+    (state.effects.italic ? 'font-style:italic;' : '') +
+    'letter-spacing:' + (state.letterSpacing || 0) + 'px';
+  probe.textContent = text;
+  document.body.appendChild(probe);
+  const w = Math.ceil(probe.getBoundingClientRect().width);
+  document.body.removeChild(probe);
+  return w;
+}
+
 // this is the main function that creates the rentry-compatible svg code
 // it's pretty long because there's a lot of different options to handle
 // the output uses data uri format which rentry supports
@@ -553,6 +530,49 @@ function generateCode() {
   const useMultiline = state.textMode === 'multi' && lines.length > 1 && state.animation !== 'marquee';
   const displayText = state.animation === 'marquee' ? state.text.replace(/\n/g, ' ') : state.text;
 
+  let decorationElements = '';
+  if ((state.underline.enabled || state.overline.enabled) && !isScrollAnim) {
+    const isMarq = state.animation === 'marquee';
+    const buildWavy = (w, y, amp, wl) => {
+      const n = Math.ceil((w * 2) / wl) + 2;
+      let p = `M 0 ${y} q ${wl/4} ${-amp} ${wl/2} 0`;
+      for (let i = 1; i < n; i++) p += ` t ${wl/2} 0`;
+      return p;
+    };
+    const buildDecor = (tw, y, decor) => {
+      const c = decor.color.replace('#', '%23'), t = decor.thickness;
+      if (decor.style === 'wavy')
+        return `<path d='${buildWavy(tw, y, t*1.5, t*4)}' fill='none' stroke='${c}' stroke-width='${t}'/>`;
+      const dash = decor.style === 'dashed' ? ` stroke-dasharray='${t*3} ${t*2}'` : '';
+      return `<line x1='0' y1='${y}' x2='${tw}' y2='${y}' stroke='${c}' stroke-width='${t}'${dash}/>`;
+    };
+    if (useMultiline) {
+      lines.forEach((line, i) => {
+        const lineY = textY + i * Math.ceil(lineHeight);
+        const tw = measureLineWidth(line);
+        let el = '';
+        if (state.underline.enabled) el += buildDecor(tw, lineY + state.fontSize * 0.12, state.underline);
+        if (state.overline.enabled)  el += buildDecor(tw, lineY - state.fontSize * 0.88, state.overline);
+        const xAlign = state.textAlign === 'center' ? `calc%2850%25 - ${tw/2}px%29` :
+                       state.textAlign === 'right'  ? `calc%28100%25 - ${tw}px%29` : '0';
+        decorationElements += `<g style='transform:translateX%28${xAlign}%29'>${el}</g>`;
+      });
+    } else {
+      const tw = measureLineWidth(displayText);
+      let el = '';
+      if (state.underline.enabled) el += buildDecor(tw, textY + state.fontSize * 0.12, state.underline);
+      if (state.overline.enabled)  el += buildDecor(tw, textY - state.fontSize * 0.88, state.overline);
+      if (isMarq) {
+        decorationElements = el;
+      } else {
+        let wrapStyle = '';
+        if (state.textAlign === 'center') wrapStyle = ` style='transform:translateX%28calc%2850%25 - ${tw/2}px%29%29'`;
+        else if (state.textAlign === 'right') wrapStyle = ` style='transform:translateX%28calc%28100%25 - ${tw}px%29%29'`;
+        decorationElements = `<g${wrapStyle}>${el}</g>`;
+      }
+    }
+  }
+
   let extraStyles = '';
 
   if (state.animation === 'wave') {
@@ -604,8 +624,9 @@ function generateCode() {
       keyframes = `@keyframes marq{0%25,100%25{transform:translateX%2880%25%29;}50%25{transform:translateX%28-80%25%29;}}`;
       textEl = `<text x='0' y='${textY}' text-anchor='start'>${escapeText(text)}</text>`;
     } else {
-      const fromX = dir === 'ltr' ? '-100%25' : '100%25';
-      const toX   = dir === 'ltr' ? '100%25'  : '-100%25';
+      const textWidth = measureLineWidth(text);
+      const fromX = dir === 'ltr' ? `-${textWidth}px` : '100%25';
+      const toX   = dir === 'ltr' ? '100%25' : `-${textWidth}px`;
       keyframes = `@keyframes marq{from{transform:translateX%28${fromX}%29;}to{transform:translateX%28${toX}%29;}}`;
       textEl = `<text x='0' y='${textY}' text-anchor='start'>${escapeText(text)}</text>`;
     }
@@ -616,12 +637,12 @@ function generateCode() {
     let scrollGroup;
     if (state.marqueeFade && !isVert) {
       defs += `<defs><mask id='fadeMask'><rect width='100%25' height='100%25' fill='white'/><rect width='15%25' height='100%25' fill='url%28%23fadeL%29'/><rect x='85%25' width='15%25' height='100%25' fill='url%28%23fadeR%29'/></mask><linearGradient id='fadeL' x1='0' x2='1'><stop offset='0' stop-color='black'/><stop offset='1' stop-color='white'/></linearGradient><linearGradient id='fadeR' x1='0' x2='1'><stop offset='0' stop-color='white'/><stop offset='1' stop-color='black'/></linearGradient></defs>`;
-      scrollGroup = `<g style='mask:url%28%23fadeMask%29'><g style='${animStyle}'>${textEl}</g></g>`;
+      scrollGroup = `<g style='mask:url%28%23fadeMask%29'><g style='${animStyle}'>${textEl}${decorationElements}</g></g>`;
     } else if (state.marqueeFade && isVert) {
       defs += `<defs><mask id='fadeMask'><rect width='100%25' height='100%25' fill='white'/><rect width='100%25' height='15%25' fill='url%28%23fadeT%29'/><rect y='85%25' width='100%25' height='15%25' fill='url%28%23fadeB%29'/></mask><linearGradient id='fadeT' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='black'/><stop offset='1' stop-color='white'/></linearGradient><linearGradient id='fadeB' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='white'/><stop offset='1' stop-color='black'/></linearGradient></defs>`;
-      scrollGroup = `<g style='mask:url%28%23fadeMask%29'><g style='${animStyle}'>${textEl}</g></g>`;
+      scrollGroup = `<g style='mask:url%28%23fadeMask%29'><g style='${animStyle}'>${textEl}${decorationElements}</g></g>`;
     } else {
-      scrollGroup = `<g style='${animStyle}'>${textEl}</g>`;
+      scrollGroup = `<g style='${animStyle}'>${textEl}${decorationElements}</g>`;
     }
     const svg = `![](data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'>${defs}<style>/*<![CDATA[*/${allStyles}/*]]>*/</style>${scrollGroup}</svg>){100%:${totalHeight}}`;
     return svg;
@@ -642,7 +663,7 @@ function generateCode() {
       textEl = `<text x='50%25' y='${textY}' text-anchor='middle'>${escapeText(displayText)}</text>`;
     }
     const allStyles = `text{${marqueeStyles}}${keyframes}`;
-    const scrollGroup = `<g style='${animStyle}'>${textEl}</g>`;
+    const scrollGroup = `<g style='${animStyle}'>${textEl}${decorationElements}</g>`;
     const svg = `![](data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'>${defs}<style>/*<![CDATA[*/${allStyles}/*]]>*/</style>${scrollGroup}</svg>){100%:${totalHeight}}`;
     return svg;
   } else if (state.animation === 'wiggle' || state.animation === 'zoom') {
@@ -668,71 +689,6 @@ function generateCode() {
     textContent = `<text text-anchor='${textAnchor}'>${tspans}</text>`;
   } else {
     textContent = `<text x='${textX}' y='${textY}' text-anchor='${textAnchor}'>${escapeText(displayText)}</text>`;
-  }
-
-  // had to do these manually because svg text-decoration doesn't work well in data uris
-  let decorationElements = '';
-  if (state.underline.enabled || state.overline.enabled) {
-    const charWidth = state.fontSize * 0.6;
-
-    function buildWavyPath(width, y, amp, wl) {
-      const numSegments = Math.ceil((width * 2) / wl) + 2;
-      let path = `M 0 ${y} q ${wl/4} ${-amp} ${wl/2} 0`;
-      for (let i = 1; i < numSegments; i++) {
-        path += ` t ${wl/2} 0`;
-      }
-      return path;
-    }
-
-   function generateLineDecor(lineText, baseY, xOffset) {
-      let decor = '';
-      const lineWidth = lineText.length * charWidth + state.letterSpacing * Math.max(0, lineText.length - 1);
-      const ulY = baseY + state.fontSize * 0.15;
-      const olY = baseY - state.fontSize * 0.85;
-
-      if (state.underline.enabled) {
-        const ulColor = state.underline.color.replace('#', '%23');
-        const ulThickness = state.underline.thickness;
-        if (state.underline.style === 'wavy') {
-          const amp = ulThickness * 1.5, wl = ulThickness * 4;
-          decor += `<path d='${buildWavyPath(lineWidth, ulY, amp, wl)}' fill='none' stroke='${ulColor}' stroke-width='${ulThickness}' transform='translate%28${xOffset},0%29'/>`;
-        } else {
-          const dash = state.underline.style === 'dashed' ? ` stroke-dasharray='${ulThickness * 3} ${ulThickness * 2}'` : '';
-          decor += `<line x1='${xOffset}' y1='${ulY}' x2='${xOffset + lineWidth}' y2='${ulY}' stroke='${ulColor}' stroke-width='${ulThickness}'${dash}/>`;
-        }
-      }
-      if (state.overline.enabled) {
-        const olColor = state.overline.color.replace('#', '%23');
-        const olThickness = state.overline.thickness;
-        if (state.overline.style === 'wavy') {
-          const amp = olThickness * 1.5, wl = olThickness * 4;
-          decor += `<path d='${buildWavyPath(lineWidth, olY, amp, wl)}' fill='none' stroke='${olColor}' stroke-width='${olThickness}' transform='translate%28${xOffset},0%29'/>`;
-        } else {
-          const dash = state.overline.style === 'dashed' ? ` stroke-dasharray='${olThickness * 3} ${olThickness * 2}'` : '';
-          decor += `<line x1='${xOffset}' y1='${olY}' x2='${xOffset + lineWidth}' y2='${olY}' stroke='${olColor}' stroke-width='${olThickness}'${dash}/>`;
-        }
-      }
-      return decor;
-    }
-
-    if (useMultiline) {
-      lines.forEach((line, i) => {
-        const lineY = textY + i * Math.ceil(lineHeight);
-        const lineWidth = line.length * charWidth + state.letterSpacing * Math.max(0, line.length - 1);
-        decorationElements += `<g style='transform:translateX%28calc%28${state.textAlign === 'center' ? '50%25' : state.textAlign === 'right' ? '100%25' : '0%25'} - ${state.textAlign === 'center' ? lineWidth/2 : state.textAlign === 'right' ? lineWidth : 0}px%29%29'>${generateLineDecor(line, lineY, 0)}</g>`;
-      });
-    } else {
-      const singleText = displayText.replace(/\n/g, ' ');
-      const textWidth = singleText.length * charWidth + state.letterSpacing * Math.max(0, singleText.length - 1);
-      decorationElements = generateLineDecor(singleText, textY, 0);
-      let decorStyle = '';
-      if (state.textAlign === 'center') {
-        decorStyle = ` style='transform:translateX%28calc%2850%25 - ${textWidth/2}px%29%29'`;
-      } else if (state.textAlign === 'right') {
-        decorStyle = ` style='transform:translateX%28calc%28100%25 - ${textWidth}px%29%29'`;
-      }
-      decorationElements = `<g${decorStyle}>${decorationElements}</g>`;
-    }
   }
 
   const styleStr = styles.join(';');
@@ -953,6 +909,49 @@ function updatePreview() {
   const useMultiline = state.textMode === 'multi' && lines.length > 1 && state.animation !== 'marquee';
   const displayText = state.animation === 'marquee' ? state.text.replace(/\n/g, ' ') : state.text;
 
+  let decorationElements = '';
+  if ((state.underline.enabled || state.overline.enabled) && !isScrollAnim) {
+    const isMarq = state.animation === 'marquee';
+    const buildWavy = (w, y, amp, wl) => {
+      const n = Math.ceil((w * 2) / wl) + 2;
+      let p = `M 0 ${y} q ${wl/4} ${-amp} ${wl/2} 0`;
+      for (let i = 1; i < n; i++) p += ` t ${wl/2} 0`;
+      return p;
+    };
+    const buildDecor = (tw, y, decor) => {
+      const c = decor.color, t = decor.thickness;
+      if (decor.style === 'wavy')
+        return `<path d="${buildWavy(tw, y, t*1.5, t*4)}" fill="none" stroke="${c}" stroke-width="${t}"/>`;
+      const dash = decor.style === 'dashed' ? ` stroke-dasharray="${t*3} ${t*2}"` : '';
+      return `<line x1="0" y1="${y}" x2="${tw}" y2="${y}" stroke="${c}" stroke-width="${t}"${dash}/>`;
+    };
+    if (useMultiline) {
+      lines.forEach((line, i) => {
+        const lineY = textY + i * Math.ceil(lineHeight);
+        const tw = measureLineWidth(line);
+        let el = '';
+        if (state.underline.enabled) el += buildDecor(tw, lineY + state.fontSize * 0.12, state.underline);
+        if (state.overline.enabled)  el += buildDecor(tw, lineY - state.fontSize * 0.88, state.overline);
+        const alignStyle = state.textAlign === 'center' ? `calc(50% - ${tw/2}px)` :
+                           state.textAlign === 'right'  ? `calc(100% - ${tw}px)` : '0';
+        decorationElements += `<g style="transform:translateX(${alignStyle})">${el}</g>`;
+      });
+    } else {
+      const tw = measureLineWidth(displayText);
+      let el = '';
+      if (state.underline.enabled) el += buildDecor(tw, textY + state.fontSize * 0.12, state.underline);
+      if (state.overline.enabled)  el += buildDecor(tw, textY - state.fontSize * 0.88, state.overline);
+      if (isMarq) {
+        decorationElements = el;
+      } else {
+        let wrapStyle = '';
+        if (state.textAlign === 'center') wrapStyle = ` style="transform:translateX(calc(50% - ${tw/2}px))"`;
+        else if (state.textAlign === 'right') wrapStyle = ` style="transform:translateX(calc(100% - ${tw}px))"`;
+        decorationElements = `<g${wrapStyle}>${el}</g>`;
+      }
+    }
+  }
+
   if (state.animation === 'wave') {
     const delay = 0.1;
     const charWidth = state.fontSize * 0.6;
@@ -1001,8 +1000,9 @@ function updatePreview() {
       extraStyles = `@keyframes marq{0%,100%{transform:translateX(80%);}50%{transform:translateX(-80%);}}`;
       textEl = `<text x="0" y="${textY}" text-anchor="start">${escapeHTML(text)}</text>`;
     } else {
-      const fromX = dir === 'ltr' ? '-100%' : '100%';
-      const toX   = dir === 'ltr' ? '100%'  : '-100%';
+      const textWidth = measureLineWidth(text);
+      const fromX = dir === 'ltr' ? `-${textWidth}px` : '100%';
+      const toX   = dir === 'ltr' ? '100%' : `-${textWidth}px`;
       extraStyles = `@keyframes marq{from{transform:translateX(${fromX});}to{transform:translateX(${toX});}}`;
       textEl = `<text x="0" y="${textY}" text-anchor="start">${escapeHTML(text)}</text>`;
     }
@@ -1011,12 +1011,14 @@ function updatePreview() {
       : `animation:marq ${speed * 3}s linear infinite;transform-box:view-box`;
     if (state.marqueeFade && !isVert) {
       defs += `<defs><mask id="fadeMask"><rect width="100%" height="100%" fill="white"/><rect width="15%" height="100%" fill="url(#fadeL)"/><rect x="85%" width="15%" height="100%" fill="url(#fadeR)"/></mask><linearGradient id="fadeL" x1="0" x2="1"><stop offset="0" stop-color="black"/><stop offset="1" stop-color="white"/></linearGradient><linearGradient id="fadeR" x1="0" x2="1"><stop offset="0" stop-color="white"/><stop offset="1" stop-color="black"/></linearGradient></defs>`;
-      textContent = `<g style="mask:url(#fadeMask)"><g style="${animStyle}">${textEl}</g></g>`;
+      textContent = `<g style="mask:url(#fadeMask)"><g style="${animStyle}">${textEl}${decorationElements}</g></g>`;
       groupAnimationCSS = '';
+      decorationElements = '';
     } else if (state.marqueeFade && isVert) {
       defs += `<defs><mask id="fadeMask"><rect width="100%" height="100%" fill="white"/><rect width="100%" height="15%" fill="url(#fadeT)"/><rect y="85%" width="100%" height="15%" fill="url(#fadeB)"/></mask><linearGradient id="fadeT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="black"/><stop offset="1" stop-color="white"/></linearGradient><linearGradient id="fadeB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="white"/><stop offset="1" stop-color="black"/></linearGradient></defs>`;
-      textContent = `<g style="mask:url(#fadeMask)"><g style="${animStyle}">${textEl}</g></g>`;
+      textContent = `<g style="mask:url(#fadeMask)"><g style="${animStyle}">${textEl}${decorationElements}</g></g>`;
       groupAnimationCSS = '';
+      decorationElements = '';
     } else {
       textContent = textEl;
       groupAnimationCSS = animStyle;
@@ -1061,72 +1063,6 @@ function updatePreview() {
     textContent = `<text x="${textX}" y="${textY}" text-anchor="${textAnchor}">${escapeHTML(displayText)}</text>`;
   }
 
-  let decorationElements = '';
-  if (state.underline.enabled || state.overline.enabled) {
-    const charWidth = state.fontSize * 0.6;
-
-    function buildWavyPathPreview(width, y, amp, wl) {
-      const numSegments = Math.ceil((width * 2) / wl) + 2;
-      let path = `M 0 ${y} q ${wl/4} ${-amp} ${wl/2} 0`;
-      for (let i = 1; i < numSegments; i++) {
-        path += ` t ${wl/2} 0`;
-      }
-      return path;
-    }
-
-    function generateLineDecorPreview(lineText, baseY, xOffset) {
-      let decor = '';
-      const lineWidth = lineText.length * charWidth + state.letterSpacing * Math.max(0, lineText.length - 1);
-      const ulY = baseY + state.fontSize * 0.15;
-      const olY = baseY - state.fontSize * 0.85;
-
-      if (state.underline.enabled) {
-        const ulColor = state.underline.color;
-        const ulThickness = state.underline.thickness;
-        if (state.underline.style === 'wavy') {
-          const amp = ulThickness * 1.5, wl = ulThickness * 4;
-          decor += `<path d="${buildWavyPathPreview(lineWidth, ulY, amp, wl)}" fill="none" stroke="${ulColor}" stroke-width="${ulThickness}" transform="translate(${xOffset},0)"/>`;
-        } else {
-          const dash = state.underline.style === 'dashed' ? ` stroke-dasharray="${ulThickness * 3} ${ulThickness * 2}"` : '';
-          decor += `<line x1="${xOffset}" y1="${ulY}" x2="${xOffset + lineWidth}" y2="${ulY}" stroke="${ulColor}" stroke-width="${ulThickness}"${dash}/>`;
-        }
-      }
-      if (state.overline.enabled) {
-        const olColor = state.overline.color;
-        const olThickness = state.overline.thickness;
-        if (state.overline.style === 'wavy') {
-          const amp = olThickness * 1.5, wl = olThickness * 4;
-          decor += `<path d="${buildWavyPathPreview(lineWidth, olY, amp, wl)}" fill="none" stroke="${olColor}" stroke-width="${olThickness}" transform="translate(${xOffset},0)"/>`;
-        } else {
-          const dash = state.overline.style === 'dashed' ? ` stroke-dasharray="${olThickness * 3} ${olThickness * 2}"` : '';
-          decor += `<line x1="${xOffset}" y1="${olY}" x2="${xOffset + lineWidth}" y2="${olY}" stroke="${olColor}" stroke-width="${olThickness}"${dash}/>`;
-        }
-      }
-      return decor;
-    }
-
-    if (useMultiline) {
-      lines.forEach((line, i) => {
-        const lineY = textY + i * Math.ceil(lineHeight);
-        const lineWidth = line.length * charWidth + state.letterSpacing * Math.max(0, line.length - 1);
-        const alignStyle = state.textAlign === 'center' ? `calc(50% - ${lineWidth/2}px)` :
-                           state.textAlign === 'right' ? `calc(100% - ${lineWidth}px)` : '0';
-        decorationElements += `<g style="transform:translateX(${alignStyle})">${generateLineDecorPreview(line, lineY, 0)}</g>`;
-      });
-    } else {
-      const singleText = displayText.replace(/\n/g, ' ');
-      const textWidth = singleText.length * charWidth + state.letterSpacing * Math.max(0, singleText.length - 1);
-      decorationElements = generateLineDecorPreview(singleText, textY, 0);
-      let decorStyle = '';
-      if (state.textAlign === 'center') {
-        decorStyle = ` style="transform:translateX(calc(50% - ${textWidth/2}px))"`;
-      } else if (state.textAlign === 'right') {
-        decorStyle = ` style="transform:translateX(calc(100% - ${textWidth}px))"`;
-      }
-      decorationElements = `<g${decorStyle}>${decorationElements}</g>`;
-    }
-  }
-
   let content = `${textContent}${decorationElements}`;
   const transformAnimations = ['bounce', 'float', 'wiggle', 'zoom'];
   const hasTransformAnim = groupAnimationCSS && transformAnimations.includes(state.animation);
@@ -1166,7 +1102,13 @@ function escapeHTML(text) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  initFontGrid();
-  initEventListeners();
-  updatePreview();
+  fetch('fonts.json')
+    .then(r => r.json())
+    .then(data => {
+      fonts = data;
+      state.font = fonts[0];
+      initFontGrid();
+      initEventListeners();
+      updatePreview();
+    });
 });

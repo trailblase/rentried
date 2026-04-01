@@ -81,11 +81,13 @@ function toggleDecoration(type) {
 function setUnderlineStyle(style) {
   state.underline.style = style;
   document.querySelectorAll('.underline-style').forEach(function(b) { b.classList.toggle('selected', b.dataset.ulstyle === style); });
+  updateLivePreview();
 }
 
 function setOverlineStyle(style) {
   state.overline.style = style;
   document.querySelectorAll('.overline-style').forEach(function(b) { b.classList.toggle('selected', b.dataset.olstyle === style); });
+  updateLivePreview();
 }
 
 function toggleOutline() {
@@ -154,10 +156,20 @@ function updateLivePreview() {
   if (state.glowEnabled)   filters.push('drop-shadow(0 0 ' + state.glowSize + 'px ' + hexToRgba(state.glowColor, state.glowOpacity) + ')');
   span.style.filter = filters.join(' ');
 
-  var decors = [];
-  if (state.underline.enabled) decors.push('underline');
-  if (state.overline.enabled)  decors.push('overline');
-  span.style.textDecoration = decors.join(' ');
+  var decorLines = [];
+  if (state.underline.enabled) decorLines.push('underline');
+  if (state.overline.enabled)  decorLines.push('overline');
+  if (decorLines.length) {
+    var decorRef = state.underline.enabled ? state.underline : state.overline;
+    span.style.textDecoration      = '';
+    span.style.textDecorationLine  = decorLines.join(' ');
+    span.style.textDecorationColor = decorRef.color;
+    span.style.textDecorationStyle = decorRef.style;
+  } else {
+    span.style.textDecorationLine  = '';
+    span.style.textDecorationColor = '';
+    span.style.textDecorationStyle = '';
+  }
 
   var fadeMask = state.marqueeFade ? 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)' : '';
   box.style.maskImage       = fadeMask;
@@ -269,6 +281,36 @@ function embedFont() {
     });
 }
 
+function measureTextWidth(text, fontFamily, fontSize, fontWeight, letterSpacing) {
+  var probe = document.createElement('span');
+  probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;' +
+    'font-family:"' + fontFamily + '",serif;' +
+    'font-size:' + fontSize + 'px;' +
+    'font-weight:' + fontWeight + ';' +
+    'letter-spacing:' + (letterSpacing || 0) + 'px';
+  probe.textContent = text;
+  document.body.appendChild(probe);
+  var w = Math.ceil(probe.getBoundingClientRect().width);
+  document.body.removeChild(probe);
+  return w;
+}
+
+function buildLineDecor(width, y, decor) {
+  if (decor.style === 'wavy') {
+    var amp = decor.thickness * 1.5, wl = decor.thickness * 4;
+    return '<path d="' + buildWavyPath(width, y, amp, wl) + '" fill="none" stroke="' + decor.color + '" stroke-width="' + decor.thickness + '"/>';
+  }
+  var dash = decor.style === 'dashed' ? ' stroke-dasharray="' + decor.thickness * 3 + ' ' + decor.thickness * 2 + '"' : '';
+  return '<line x1="0" y1="' + y + '" x2="' + width + '" y2="' + y + '" stroke="' + decor.color + '" stroke-width="' + decor.thickness + '"' + dash + '/>';
+}
+
+function buildWavyPath(width, y, amp, wl) {
+  var segs = Math.ceil((width * 2) / wl) + 2;
+  var path = 'M 0 ' + y + ' q ' + (wl/4) + ' ' + (-amp) + ' ' + (wl/2) + ' 0';
+  for (var i = 1; i < segs; i++) path += ' t ' + (wl/2) + ' 0';
+  return path;
+}
+
 function buildSVG(fontFamily, b64arr) {
   var text = (el('textInput').value || 'Hello World').replace(/\n/g, ' ');
   var effectPadding = Math.max(
@@ -332,7 +374,14 @@ function buildSVG(fontFamily, b64arr) {
       '<rect width="15%" height="100%" fill="url(#fadeL)"/><rect x="85%" width="15%" height="100%" fill="url(#fadeR)"/></mask>';
   }
 
-  var decorEl    = buildDecorations(text, textY);
+  var decorEl = '';
+  if (state.underline.enabled || state.overline.enabled) {
+    var fw = state.effects.bold ? Math.max(state.fontWeight, 700) : state.fontWeight;
+    var tw = measureTextWidth(text, fontFamily, state.fontSize, fw, state.letterSpacing);
+    if (state.underline.enabled) decorEl += buildLineDecor(tw, textY + state.fontSize * 0.12, state.underline);
+    if (state.overline.enabled)  decorEl += buildLineDecor(tw, textY - state.fontSize * 0.88, state.overline);
+  }
+
   var innerGroup = '<g style="' + animStyle + '">' + textEl + decorEl + '</g>';
   if (state.marqueeFade) innerGroup = '<g style="mask:url(#fadeMask)">' + innerGroup + '</g>';
 
@@ -345,30 +394,6 @@ function buildSVG(fontFamily, b64arr) {
   el('codeOutput').textContent = '![](data:image/svg+xml;base64,' + b64 + ')';
 }
 
-function buildDecorations(text, textY) {
-  if (!state.underline.enabled && !state.overline.enabled) return '';
-  var textWidth = text.length * state.fontSize * 0.6 + state.letterSpacing * Math.max(0, text.length - 1);
-  var result = '';
-  if (state.underline.enabled) result += buildLineDecor(textWidth, textY + state.fontSize * 0.15,  state.underline);
-  if (state.overline.enabled)  result += buildLineDecor(textWidth, textY - state.fontSize * 0.85, state.overline);
-  return result;
-}
-
-function buildLineDecor(width, y, decor) {
-  if (decor.style === 'wavy') {
-    var amp = decor.thickness * 1.5, wl = decor.thickness * 4;
-    return '<path d="' + buildWavyPath(width, y, amp, wl) + '" fill="none" stroke="' + decor.color + '" stroke-width="' + decor.thickness + '"/>';
-  }
-  var dash = decor.style === 'dashed' ? ' stroke-dasharray="' + decor.thickness * 3 + ' ' + decor.thickness * 2 + '"' : '';
-  return '<line x1="0" y1="' + y + '" x2="' + width + '" y2="' + y + '" stroke="' + decor.color + '" stroke-width="' + decor.thickness + '"' + dash + '/>';
-}
-
-function buildWavyPath(width, y, amp, wl) {
-  var segs = Math.ceil((width * 2) / wl) + 2;
-  var path = 'M 0 ' + y + ' q ' + (wl/4) + ' ' + (-amp) + ' ' + (wl/2) + ' 0';
-  for (var i = 1; i < segs; i++) path += ' t ' + (wl/2) + ' 0';
-  return path;
-}
 
 on('fontUrlInput', 'paste',   function() { setTimeout(loadFontFromUrl, 30); });
 on('fontUrlInput', 'keydown', function(e) { if (e.key === 'Enter') loadFontFromUrl(); });
@@ -420,10 +445,10 @@ on('letterSpacing', 'input', function(e) {
   updateLivePreview();
 });
 
-on('underlineColor',     'input', function(e) { state.underline.color = e.target.value; });
-on('underlineThickness', 'input', function(e) { state.underline.thickness = parseInt(e.target.value) || 2; });
-on('overlineColor',      'input', function(e) { state.overline.color = e.target.value; });
-on('overlineThickness',  'input', function(e) { state.overline.thickness = parseInt(e.target.value) || 2; });
+on('underlineColor',     'input', function(e) { state.underline.color = e.target.value; updateLivePreview(); });
+on('underlineThickness', 'input', function(e) { state.underline.thickness = parseInt(e.target.value) || 2; updateLivePreview(); });
+on('overlineColor',      'input', function(e) { state.overline.color = e.target.value; updateLivePreview(); });
+on('overlineThickness',  'input', function(e) { state.overline.thickness = parseInt(e.target.value) || 2; updateLivePreview(); });
 
 on('outlineColor', 'input', function(e) { state.outlineColor = e.target.value; updateLivePreview(); });
 on('outlineWidth', 'input', function(e) { state.outlineWidth = parseFloat(e.target.value) || 1; updateLivePreview(); });
